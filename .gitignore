@@ -1,7 +1,41 @@
 # Ignore everything on scratch by default, except the provided examples
-/*
-!.gitignore
+# /*
+# !.gitignore
 
+# !nested-subdir/
+# !subdir/
+# !scratch-simulator.cc
+# !CMakeLists.txt
+/*
+
+/*
+
+# 允许以下内容上传
+!.gitignore
+!CMakeLists.txt
+!scratch-simulator.cc
+!quic.cc
+
+!nested-subdir/
+!subdir/
+
+!http1.1/
+!http1.1_bandwidth/
+!http1.1_baseline/
+!http1.1_jitter/
+!http1.1_lose/
+
+!http2/
+!http2_bandwidth/
+!http2_baseline/
+!http2_jitter/
+!http2_lose/
+
+!http3/
+!http3_bandwidth/
+!http3_baseline/
+!http3_jitter/
+!http3_lose/
 !nested-subdir/
 !subdir/
 !scratch-simulator.cc

@@ -1,0 +1,187 @@
+{
+  "0.01": {
+    "completion_rate": 1.0,
+    "avg_latency": 0.10068199999999998,
+    "avg_throughput": 8.13650900856161,
+    "round_results": [
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      }
+    ]
+  },
+  "0.02": {
+    "completion_rate": 1.0,
+    "avg_latency": 0.10068199999999998,
+    "avg_throughput": 8.13650900856161,
+    "round_results": [
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      }
+    ]
+  },
+  "0.05": {
+    "completion_rate": 1.0,
+    "avg_latency": 0.10068199999999998,
+    "avg_throughput": 8.13650900856161,
+    "round_results": [
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      }
+    ]
+  },
+  "0.1": {
+    "completion_rate": 1.0,
+    "avg_latency": 0.10068199999999998,
+    "avg_throughput": 8.13650900856161,
+    "round_results": [
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100682,
+        "throughput": 8.13650900856161
+      }
+    ]
+  },
+  "0.2": {
+    "completion_rate": 1.0,
+    "avg_latency": 0.100683,
+    "avg_throughput": 8.136428195425246,
+    "round_results": [
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100683,
+        "throughput": 8.136428195425246
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100683,
+        "throughput": 8.136428195425246
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100683,
+        "throughput": 8.136428195425246
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100683,
+        "throughput": 8.136428195425246
+      },
+      {
+        "completed": 50,
+        "total": 50,
+        "latency": 0.100683,
+        "throughput": 8.136428195425246
+      }
+    ]
+  }
+}
