@@ -78,11 +78,12 @@ class HttpClientApp : public Application {
 public:
   HttpClientApp() : m_socket(0), m_port(0) {}
   virtual ~HttpClientApp() { m_socket = 0; }
-  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs) {
+  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs, double interval) {
     m_servAddr = servAddr;
     m_port = port;
     m_reqSize = reqSize;
     m_nReqs = nReqs;
+    m_interval = interval;
   }
   uint32_t GetRespsRcvd() const { return m_respsRcvd; }
   const std::vector<double>& GetReqSendTimes() const { return m_reqSendTimes; }
@@ -148,7 +149,7 @@ private:
             m_respRecvTimes.push_back(Simulator::Now().GetSeconds());
             std::cout << "[Client] Received response " << m_respsRcvd << " at " << Simulator::Now().GetSeconds() << "s" << std::endl;
             if (m_respsRcvd < m_nReqs) {
-              Simulator::Schedule(Seconds(0.01), &HttpClientApp::SendNextRequest, this);
+              Simulator::Schedule(Seconds(m_interval), &HttpClientApp::SendNextRequest, this);
             }
             m_buffer = m_buffer.substr(m_bodyStart + m_bytesToRecv);
             m_bytesToRecv = 0;
@@ -172,11 +173,12 @@ private:
   std::vector<double> m_respRecvTimes;
   std::string m_buffer;
   uint32_t m_bodyStart = 0;
+  double m_interval = 0.01;
 };
 
 // ===================== Main =====================
 int main(int argc, char *argv[]) {
-  uint32_t nRequests = 5;
+  uint32_t nRequests = 50;
   uint32_t respSize = 100*1024; // 100KB per response
   uint32_t reqSize = 100; // 请求报文大小
   uint16_t httpPort = 8080;
@@ -184,6 +186,7 @@ int main(int argc, char *argv[]) {
   double errorRate = 0.01;
   std::string dataRate = "10Mbps";
   std::string delay = "5ms";
+  double interval = 0.01;
   CommandLine cmd;
   cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
   cmd.AddValue("respSize", "HTTP response size (bytes)", respSize);
@@ -193,6 +196,7 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("errorRate", "Packet loss rate", errorRate);
   cmd.AddValue("dataRate", "Link bandwidth", dataRate);
   cmd.AddValue("delay", "Link delay", delay);
+  cmd.AddValue("interval", "Interval between HTTP requests (s)", interval);
   cmd.Parse(argc, argv);
 
   NodeContainer nodes;
@@ -215,26 +219,26 @@ int main(int argc, char *argv[]) {
   serverApp->Setup(httpPort, respSize, nRequests);
   nodes.Get(1)->AddApplication(serverApp);
   serverApp->SetStartTime(Seconds(0.5));
-  serverApp->SetStopTime(Seconds(10.0));
+  serverApp->SetStopTime(Seconds(30.0));
 
   Ptr<HttpClientApp> clientApp = CreateObject<HttpClientApp>();
-  clientApp->Setup(interfaces.GetAddress(1), httpPort, reqSize, nRequests);
+  clientApp->Setup(interfaces.GetAddress(1), httpPort, reqSize, nRequests, interval);
   nodes.Get(0)->AddApplication(clientApp);
   clientApp->SetStartTime(Seconds(1.0));
-  clientApp->SetStopTime(Seconds(10.0));
+  clientApp->SetStopTime(Seconds(30.0));
 
   // BulkSend/PacketSink
   Address sinkAddress(InetSocketAddress(interfaces.GetAddress(1), bulkPort));
   PacketSinkHelper packetSinkHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), bulkPort));
   ApplicationContainer sinkApp = packetSinkHelper.Install(nodes.Get(1));
   sinkApp.Start(Seconds(0.5));
-  sinkApp.Stop(Seconds(10.0));
+  sinkApp.Stop(Seconds(30.0));
 
   BulkSendHelper bulkSendHelper("ns3::TcpSocketFactory", sinkAddress);
   bulkSendHelper.SetAttribute("MaxBytes", UintegerValue(100*1024*5)); // 5个100KB
   ApplicationContainer sourceApp = bulkSendHelper.Install(nodes.Get(0));
   sourceApp.Start(Seconds(1.0));
-  sourceApp.Stop(Seconds(10.0));
+  sourceApp.Stop(Seconds(30.0));
 
   Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
   em->SetAttribute("ErrorRate", DoubleValue(errorRate));
@@ -251,7 +255,7 @@ int main(int argc, char *argv[]) {
     "/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacRx",
     MakeCallback(&RxTrace));
 
-  Simulator::Stop(Seconds(12.0));
+  Simulator::Stop(Seconds(32.0));
   Simulator::Run();
 
   // BulkSend/PacketSink 统计
@@ -279,6 +283,14 @@ int main(int argc, char *argv[]) {
   for (auto d : delays) {
     std::cout << "," << d;
   }
+  std::cout << std::endl;
+
+  // 输出所有请求的发送和接收时间
+  std::cout << "send_times";
+  for (auto t : sendTimes) std::cout << "," << t;
+  std::cout << std::endl;
+  std::cout << "recv_times";
+  for (auto t : recvTimes) std::cout << "," << t;
   std::cout << std::endl;
 
   // FlowMonitor 统计

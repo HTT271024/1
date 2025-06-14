@@ -148,45 +148,45 @@ private:
 void RunSimulation(const std::string& dataRate, uint32_t nRequests, uint32_t respSize, uint32_t reqSize, uint16_t httpPort, double errorRate, const std::string& delay, double interval, double& throughput, double& completeRate, double& avgDelayMs, uint32_t& lost) {
   NodeContainer nodes;
   nodes.Create(2);
-  PointToPointHelper p2p;
-  p2p.SetDeviceAttribute("DataRate", StringValue(dataRate));
-  p2p.SetChannelAttribute("Delay", StringValue(delay));
-  NetDeviceContainer devices = p2p.Install(nodes);
+    PointToPointHelper p2p;
+    p2p.SetDeviceAttribute("DataRate", StringValue(dataRate));
+    p2p.SetChannelAttribute("Delay", StringValue(delay));
+    NetDeviceContainer devices = p2p.Install(nodes);
   InternetStackHelper stack;
   stack.Install(nodes);
-  Ipv4AddressHelper address;
-  address.SetBase("10.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer interfaces = address.Assign(devices);
-  Ptr<HttpServerApp> serverApp = CreateObject<HttpServerApp>();
-  serverApp->Setup(httpPort, respSize, nRequests);
-  nodes.Get(1)->AddApplication(serverApp);
-  serverApp->SetStartTime(Seconds(0.5));
+    Ipv4AddressHelper address;
+    address.SetBase("10.1.1.0", "255.255.255.0");
+    Ipv4InterfaceContainer interfaces = address.Assign(devices);
+    Ptr<HttpServerApp> serverApp = CreateObject<HttpServerApp>();
+    serverApp->Setup(httpPort, respSize, nRequests);
+    nodes.Get(1)->AddApplication(serverApp);
+    serverApp->SetStartTime(Seconds(0.5));
   serverApp->SetStopTime(Seconds(60.0));
-  Ptr<HttpClientApp> clientApp = CreateObject<HttpClientApp>();
+    Ptr<HttpClientApp> clientApp = CreateObject<HttpClientApp>();
   clientApp->Setup(interfaces.GetAddress(1), httpPort, reqSize, nRequests, interval);
-  nodes.Get(0)->AddApplication(clientApp);
-  clientApp->SetStartTime(Seconds(1.0));
+    nodes.Get(0)->AddApplication(clientApp);
+    clientApp->SetStartTime(Seconds(1.0));
   clientApp->SetStopTime(Seconds(60.0));
-  Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
-  em->SetAttribute("ErrorRate", DoubleValue(errorRate));
-  em->SetAttribute("ErrorUnit", StringValue("ERROR_UNIT_PACKET"));
-  devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
+    Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
+    em->SetAttribute("ErrorRate", DoubleValue(errorRate));
+    em->SetAttribute("ErrorUnit", StringValue("ERROR_UNIT_PACKET"));
+    devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
   Simulator::Stop(Seconds(65.0));
-  Simulator::Run();
-  const auto& sendTimes = clientApp->GetReqSendTimes();
-  const auto& recvTimes = clientApp->GetRespRecvTimes();
-  double totalDelay = 0.0;
-  size_t nDone = std::min(sendTimes.size(), recvTimes.size());
-  for (size_t i = 0; i < nDone; ++i) {
-    totalDelay += (recvTimes[i] - sendTimes[i]);
-  }
+    Simulator::Run();
+    const auto& sendTimes = clientApp->GetReqSendTimes();
+    const auto& recvTimes = clientApp->GetRespRecvTimes();
+    double totalDelay = 0.0;
+    size_t nDone = std::min(sendTimes.size(), recvTimes.size());
+    for (size_t i = 0; i < nDone; ++i) {
+      totalDelay += (recvTimes[i] - sendTimes[i]);
+    }
   avgDelayMs = nDone > 0 ? (totalDelay / nDone) * 1000.0 : 0.0;
-  double totalBytes = nDone * respSize;
-  double totalTime = nDone > 0 ? (recvTimes[nDone-1] - sendTimes[0]) : 1;
+    double totalBytes = nDone * respSize;
+    double totalTime = nDone > 0 ? (recvTimes[nDone-1] - sendTimes[0]) : 1;
   throughput = (totalBytes * 8) / (totalTime * 1e6); // Mbps
   completeRate = nDone / double(nRequests);
   lost = sendTimes.size() - recvTimes.size();
-  Simulator::Destroy();
+    Simulator::Destroy();
 }
 
 int main(int argc, char *argv[]) {

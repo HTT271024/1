@@ -1,116 +1,140 @@
+import pandas as pd
 import matplotlib.pyplot as plt
+import glob
 import numpy as np
-import json
-import os
-from datetime import datetime
+import re
 
-def plot_results(results):
-    # 创建图表
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-    
-    # 准备数据
-    intervals = [r['interval'] for r in results]
-    throughputs = [r['throughput'] for r in results]
-    latencies = [r['latency'] for r in results]
-    
-    # 绘制吞吐量图
-    ax1.plot(intervals, throughputs, 'bo-', label='Throughput', linewidth=2, markersize=8)
-    ax1.set_xlabel('Request Interval (s)')
-    ax1.set_ylabel('Throughput (Mbps)')
-    ax1.set_title('Throughput vs Request Interval')
-    ax1.grid(True)
-    
-    # 添加数据点标签
-    for i, txt in enumerate(throughputs):
-        ax1.annotate(f'{txt:.2f}', (intervals[i], throughputs[i]), 
-                    xytext=(5, 5), textcoords='offset points')
-    
-    # 绘制延迟图
-    ax2.plot(intervals, latencies, 'ro-', label='Latency', linewidth=2, markersize=8)
-    ax2.set_xlabel('Request Interval (s)')
-    ax2.set_ylabel('Latency (s)')
-    ax2.set_title('Latency vs Request Interval')
-    ax2.grid(True)
-    
-    # 添加数据点标签
-    for i, txt in enumerate(latencies):
-        ax2.annotate(f'{txt:.6f}', (intervals[i], latencies[i]), 
-                    xytext=(5, 5), textcoords='offset points')
-    
-    # 保存图表
-    plt.tight_layout()
-    plt.savefig('experiment_results.png', dpi=300, bbox_inches='tight')
-    plt.close()
+# 读取数据
+files = sorted(glob.glob('sim_result_*.txt'))
+data = []
 
-def save_results(results):
-    # 保存结果到JSON文件
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f'experiment_results_{timestamp}.json'
-    
-    with open(filename, 'w') as f:
-        json.dump(results, f, indent=4)
-    
-    # 同时保存一个易读的文本文件
-    txt_filename = f'experiment_results_{timestamp}.txt'
-    with open(txt_filename, 'w') as f:
-        f.write('HTTP/1.1 Experiment Results\n')
-        f.write('=' * 50 + '\n\n')
-        
-        for result in results:
-            f.write(f"Interval: {result['interval']}s\n")
-            f.write(f"Completion Rate: {result['completion_rate']}\n")
-            f.write(f"Average Latency: {result['latency']:.6f} s\n")
-            f.write(f"Average Throughput: {result['throughput']:.2f} Mbps\n")
-            f.write(f"Total Bytes Received: {result['total_bytes']}\n")
-            f.write('-' * 50 + '\n\n')
+for file in files:
+    with open(file, 'r') as f:
+        content = f.read()
+    # 获取 interval
+    interval_match = re.search(r'Request Interval: ([0-9.]+) s', content)
+    if interval_match:
+        interval = float(interval_match.group(1))
+    else:
+        m = re.search(r'sim_result_([0-9.]+)\.txt', file)
+        if not m:
+            print(f"Warning: filename {file} does not match expected pattern, skipping.")
+            continue
+        interval = float(m.group(1))
 
-def main():
-    # 示例结果数据
-    results = [
-        {
-            'interval': 0.01,
-            'completion_rate': '5/5',
-            'latency': 0.105155,
-            'throughput': 5.64364,
-            'total_bytes': 512000
-        },
-        {
-            'interval': 0.02,
-            'completion_rate': '5/5',
-            'latency': 0.105072,
-            'throughput': 4.42638,
-            'total_bytes': 512000
-        },
-        {
-            'interval': 0.05,
-            'completion_rate': '5/5',
-            'latency': 0.105155,
-            'throughput': 5.64364,
-            'total_bytes': 512000
-        },
-        {
-            'interval': 0.1,
-            'completion_rate': '5/5',
-            'latency': 0.105072,
-            'throughput': 4.42638,
-            'total_bytes': 512000
-        },
-        {
-            'interval': 0.2,
-            'completion_rate': '5/5',
-            'latency': 0.105072,
-            'throughput': 4.42638,
-            'total_bytes': 512000
-        }
-    ]
-    
-    # 生成图表
-    plot_results(results)
-    
-    # 保存结果
-    save_results(results)
-    
-    print("Results have been saved and plots have been generated!")
+    try:
+        throughput = float(content.split('平均吞吐量: ')[1].split(' Mbps')[0])
+        delay = float(content.split('平均延迟: ')[1].split(' s')[0])
+        page_load = float(content.split('Page Load Time (onLoad): ')[1].split(' s')[0])
+        data.append({
+            'interval': interval,
+            'throughput': throughput,
+            'delay': delay,
+            'page_load': page_load
+        })
+    except Exception as e:
+        print(f"Error parsing {file}: {e}")
+        continue
 
-if __name__ == '__main__':
-    main() 
+# 转为 DataFrame
+df = pd.DataFrame(data)
+df = df.sort_values('interval')
+
+# 绘图
+plt.figure(figsize=(15, 5))
+
+# ----------------------------
+# 1. Throughput vs Interval
+# ----------------------------
+plt.subplot(1, 3, 1)
+plt.plot(df['interval'], df['throughput'], 'bo-', label='Throughput')
+plt.xlabel('Request Interval (s)')
+plt.ylabel('Throughput (Mbps)')
+plt.title('Throughput vs Request Interval\n(Single Connection)')
+plt.grid(True)
+plt.legend()
+
+# 拟合线（可选）
+z = np.polyfit(df['interval'], df['throughput'], 2)
+p = np.poly1d(z)
+plt.plot(df['interval'], p(df['interval']), "b--", alpha=0.3)
+
+# 注释最大吞吐
+max_tp_idx = df['throughput'].idxmax()
+max_tp_x = df.loc[max_tp_idx, 'interval']
+max_tp_y = df.loc[max_tp_idx, 'throughput']
+plt.annotate('⬆️ Max throughput',
+             xy=(max_tp_x, max_tp_y),
+             xytext=(max_tp_x - 0.05, max_tp_y + 0.5),
+             arrowprops=dict(facecolor='blue', arrowstyle='->'),
+             fontsize=10, color='blue')
+
+# 注释最小吞吐
+min_tp_idx = df['throughput'].idxmin()
+min_tp_x = df.loc[min_tp_idx, 'interval']
+min_tp_y = df.loc[min_tp_idx, 'throughput']
+plt.annotate('❗HOL blocking severe',
+             xy=(min_tp_x, min_tp_y),
+             xytext=(min_tp_x + 0.02, min_tp_y + 1.0),
+             arrowprops=dict(facecolor='red', arrowstyle='->'),
+             fontsize=10, color='red')
+
+# ----------------------------
+# 2. Delay vs Interval
+# ----------------------------
+plt.subplot(1, 3, 2)
+plt.plot(df['interval'], df['delay'], 'ro-', label='Average Delay')
+plt.xlabel('Request Interval (s)')
+plt.ylabel('Delay (s)')
+plt.title('Delay vs Request Interval\n(Single Connection)')
+plt.grid(True)
+plt.legend()
+
+# 拟合线
+z = np.polyfit(df['interval'], df['delay'], 2)
+p = np.poly1d(z)
+plt.plot(df['interval'], p(df['interval']), "r--", alpha=0.3)
+
+# 最大延迟
+max_d_idx = df['delay'].idxmax()
+max_d_x = df.loc[max_d_idx, 'interval']
+max_d_y = df.loc[max_d_idx, 'delay']
+plt.annotate('⛔ Delay peak',
+             xy=(max_d_x, max_d_y),
+             xytext=(max_d_x + 0.02, max_d_y + 0.05),
+             arrowprops=dict(facecolor='red', arrowstyle='->'),
+             fontsize=10, color='red')
+
+# 最小延迟
+min_d_idx = df['delay'].idxmin()
+min_d_x = df.loc[min_d_idx, 'interval']
+min_d_y = df.loc[min_d_idx, 'delay']
+plt.annotate('✅ Best response',
+             xy=(min_d_x, min_d_y),
+             xytext=(min_d_x - 0.05, min_d_y + 0.04),
+             arrowprops=dict(facecolor='green', arrowstyle='->'),
+             fontsize=10, color='green')
+
+# ----------------------------
+# 3. Page Load Time
+# ----------------------------
+plt.subplot(1, 3, 3)
+plt.plot(df['interval'], df['page_load'], 'go-', label='Page Load Time')
+plt.xlabel('Request Interval (s)')
+plt.ylabel('Time (s)')
+plt.title('Page Load Time vs Request Interval\n(Single Connection)')
+plt.grid(True)
+plt.legend()
+
+plt.tight_layout()
+plt.savefig('single_connection_results_annotated.png', dpi=300, bbox_inches='tight')
+plt.close()
+
+# 总结信息
+print("\nSingle Connection Results Summary:")
+print("=" * 50)
+print(f"Number of intervals tested: {len(df)}")
+print("\nBest Performance:")
+print(f"Highest Throughput: {df['throughput'].max():.2f} Mbps at interval {df.loc[df['throughput'].idxmax(), 'interval']:.3f}s")
+print(f"Lowest Delay: {df['delay'].min():.4f} s at interval {df.loc[df['delay'].idxmin(), 'interval']:.3f}s")
+print(f"Lowest Page Load Time: {df['page_load'].min():.4f} s at interval {df.loc[df['page_load'].idxmin(), 'interval']:.3f}s")

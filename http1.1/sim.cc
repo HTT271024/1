@@ -176,14 +176,15 @@ private:
 
 // ===================== Main =====================
 int main(int argc, char *argv[]) {
-  uint32_t nRequests = 50;  // 增加到50个请求
+  uint32_t nRequests = 200;  // 总请求数
   uint32_t respSize = 100*1024; // 100KB per response
   uint32_t reqSize = 100; // 请求报文大小
   uint16_t httpPort = 8080;
   double errorRate = 0.01;
   std::string dataRate = "10Mbps";
   std::string delay = "5ms";
-  double interval = 0.01;  // 默认请求间隔为 0.01 秒
+  double interval = 0.01;
+  uint32_t nConnections = 1; // 新增：并发连接数，默认1
 
   CommandLine cmd;
   cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
@@ -194,6 +195,7 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("dataRate", "Link bandwidth", dataRate);
   cmd.AddValue("delay", "Link delay", delay);
   cmd.AddValue("interval", "Interval between HTTP requests (s)", interval);
+  cmd.AddValue("nConnections", "Number of parallel HTTP/1.1 connections", nConnections);
   cmd.Parse(argc, argv);
 
   NodeContainer nodes;
@@ -216,13 +218,22 @@ int main(int argc, char *argv[]) {
   serverApp->Setup(httpPort, respSize, nRequests);
   nodes.Get(1)->AddApplication(serverApp);
   serverApp->SetStartTime(Seconds(0.5));
-  serverApp->SetStopTime(Seconds(30.0));  // 延长服务器运行时间
+  serverApp->SetStopTime(Seconds(30.0));
 
-  Ptr<HttpClientApp> clientApp = CreateObject<HttpClientApp>();
-  clientApp->Setup(interfaces.GetAddress(1), httpPort, reqSize, nRequests, interval);
-  nodes.Get(0)->AddApplication(clientApp);
-  clientApp->SetStartTime(Seconds(1.0));
-  clientApp->SetStopTime(Seconds(30.0));  // 延长客户端运行时间
+  // 多连接客户端
+  std::vector<Ptr<HttpClientApp>> clients;
+  std::vector<std::vector<double>> allSendTimes, allRecvTimes;
+  uint32_t baseReqs = nRequests / nConnections;
+  uint32_t rem = nRequests % nConnections;
+  for (uint32_t i = 0; i < nConnections; ++i) {
+    uint32_t reqs = baseReqs + (i < rem ? 1 : 0); // 平均分配请求
+    Ptr<HttpClientApp> client = CreateObject<HttpClientApp>();
+    client->Setup(interfaces.GetAddress(1), httpPort, reqSize, reqs, interval);
+    nodes.Get(0)->AddApplication(client);
+    client->SetStartTime(Seconds(1.0 + i * 0.01)); // 避免完全同时启动
+    client->SetStopTime(Seconds(30.0));
+    clients.push_back(client);
+  }
 
   Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
   em->SetAttribute("ErrorRate", DoubleValue(errorRate));
@@ -239,13 +250,23 @@ int main(int argc, char *argv[]) {
     "/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacRx",
     MakeCallback(&RxTrace));
 
-  Simulator::Stop(Seconds(35.0));  // 延长总模拟时间
+  Simulator::Stop(Seconds(35.0));
   Simulator::Run();
 
   // HTTP/1.1 Application 统计
-  std::cout << "HTTP/1.1 实验结束，客户端共收到响应数: " << clientApp->GetRespsRcvd() << "/" << nRequests << std::endl;
-  const auto& sendTimes = clientApp->GetReqSendTimes();
-  const auto& recvTimes = clientApp->GetRespRecvTimes();
+  uint32_t totalResps = 0;
+  std::vector<double> sendTimes, recvTimes;
+  for (auto& client : clients) {
+    totalResps += client->GetRespsRcvd();
+    const auto& s = client->GetReqSendTimes();
+    const auto& r = client->GetRespRecvTimes();
+    sendTimes.insert(sendTimes.end(), s.begin(), s.end());
+    recvTimes.insert(recvTimes.end(), r.begin(), r.end());
+  }
+  // 按发送时间排序（可选）
+  std::sort(sendTimes.begin(), sendTimes.end());
+  std::sort(recvTimes.begin(), recvTimes.end());
+
   double totalDelay = 0.0;
   size_t nDone = std::min(sendTimes.size(), recvTimes.size());
   for (size_t i = 0; i < nDone; ++i) {
@@ -256,11 +277,18 @@ int main(int argc, char *argv[]) {
     double totalBytes = nDone * respSize;
     double totalTime = recvTimes[nDone-1] - sendTimes[0];
     double throughput = (totalBytes * 8) / (totalTime * 1e6); // Mbps
+    std::cout << "HTTP/1.1 实验结束，客户端共收到响应数: " << totalResps << "/" << nRequests << std::endl;
     std::cout << "HTTP/1.1 平均延迟: " << avgDelay << " s" << std::endl;
     std::cout << "HTTP/1.1 平均吞吐量: " << throughput << " Mbps" << std::endl;
+    // --- 新增：页面加载时间 ---
+    double startTime = sendTimes[0];
+    double endTime = recvTimes[nDone-1];
+    double pageLoadTime = endTime - startTime;
+    std::cout << "------------------------------------------" << std::endl;
+    std::cout << "HTTP/1.1 Page Load Time (onLoad): " << pageLoadTime << " s" << std::endl;
+    std::cout << "------------------------------------------" << std::endl;
   }
 
-  // FlowMonitor 统计
   flowmon->CheckForLostPackets();
   flowmon->SerializeToXmlFile("flowmon.xml", true, true);
 
