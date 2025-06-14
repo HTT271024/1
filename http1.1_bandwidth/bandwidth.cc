@@ -3,6 +3,8 @@
 #include "ns3/internet-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/flow-monitor-helper.h"
+#include "ns3/ipv4-flow-classifier.h"
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -145,52 +147,15 @@ private:
   double m_interval = 0.01;  // 默认间隔为 0.01 秒
 };
 
-void RunSimulation(const std::string& dataRate, uint32_t nRequests, uint32_t respSize, uint32_t reqSize, uint16_t httpPort, double errorRate, const std::string& delay, double interval, double& throughput, double& completeRate, double& avgDelayMs, uint32_t& lost) {
-  NodeContainer nodes;
-  nodes.Create(2);
-    PointToPointHelper p2p;
-    p2p.SetDeviceAttribute("DataRate", StringValue(dataRate));
-    p2p.SetChannelAttribute("Delay", StringValue(delay));
-    NetDeviceContainer devices = p2p.Install(nodes);
-  InternetStackHelper stack;
-  stack.Install(nodes);
-    Ipv4AddressHelper address;
-    address.SetBase("10.1.1.0", "255.255.255.0");
-    Ipv4InterfaceContainer interfaces = address.Assign(devices);
-    Ptr<HttpServerApp> serverApp = CreateObject<HttpServerApp>();
-    serverApp->Setup(httpPort, respSize, nRequests);
-    nodes.Get(1)->AddApplication(serverApp);
-    serverApp->SetStartTime(Seconds(0.5));
-  serverApp->SetStopTime(Seconds(60.0));
-    Ptr<HttpClientApp> clientApp = CreateObject<HttpClientApp>();
-  clientApp->Setup(interfaces.GetAddress(1), httpPort, reqSize, nRequests, interval);
-    nodes.Get(0)->AddApplication(clientApp);
-    clientApp->SetStartTime(Seconds(1.0));
-  clientApp->SetStopTime(Seconds(60.0));
-    Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
-    em->SetAttribute("ErrorRate", DoubleValue(errorRate));
-    em->SetAttribute("ErrorUnit", StringValue("ERROR_UNIT_PACKET"));
-    devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
-  Simulator::Stop(Seconds(65.0));
-    Simulator::Run();
-    const auto& sendTimes = clientApp->GetReqSendTimes();
-    const auto& recvTimes = clientApp->GetRespRecvTimes();
-    double totalDelay = 0.0;
-    size_t nDone = std::min(sendTimes.size(), recvTimes.size());
-    for (size_t i = 0; i < nDone; ++i) {
-      totalDelay += (recvTimes[i] - sendTimes[i]);
-    }
-  avgDelayMs = nDone > 0 ? (totalDelay / nDone) * 1000.0 : 0.0;
-    double totalBytes = nDone * respSize;
-    double totalTime = nDone > 0 ? (recvTimes[nDone-1] - sendTimes[0]) : 1;
-  throughput = (totalBytes * 8) / (totalTime * 1e6); // Mbps
-  completeRate = nDone / double(nRequests);
-  lost = sendTimes.size() - recvTimes.size();
-    Simulator::Destroy();
+static void TxTrace(Ptr<const Packet> p) {
+  std::cout << "[Trace] 发送数据包: " << p->GetSize() << " bytes" << std::endl;
+}
+static void RxTrace(Ptr<const Packet> p) {
+  std::cout << "[Trace] 接收数据包: " << p->GetSize() << " bytes" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
-  std::vector<std::string> dataRates = {"2Mbps", "5Mbps", "10Mbps", "20Mbps"};
+  std::string dataRate = "10Mbps";
   uint32_t nRequests = 100;
   uint32_t respSize = 100*1024;
   uint32_t reqSize = 100;
@@ -199,42 +164,69 @@ int main(int argc, char *argv[]) {
   std::string delay = "5ms";
   double interval = 0.05;
   uint32_t nRuns = 5;
+  std::vector<double> delays;
   CommandLine cmd;
-  cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
-  cmd.AddValue("respSize", "HTTP response size (bytes)", respSize);
-  cmd.AddValue("reqSize", "HTTP request size (bytes)", reqSize);
-  cmd.AddValue("httpPort", "HTTP server port", httpPort);
-  cmd.AddValue("errorRate", "Packet loss rate", errorRate);
-  cmd.AddValue("delay", "Link delay", delay);
-  cmd.AddValue("interval", "Interval between HTTP requests (s)", interval);
-  cmd.AddValue("nRuns", "Number of runs for averaging", nRuns);
+  cmd.AddValue("dataRate", "链路带宽", dataRate);
+  cmd.AddValue("nRequests", "HTTP 请求数", nRequests);
+  cmd.AddValue("respSize", "HTTP 响应大小 (bytes)", respSize);
+  cmd.AddValue("reqSize", "HTTP 请求大小 (bytes)", reqSize);
+  cmd.AddValue("httpPort", "HTTP 服务器端口", httpPort);
+  cmd.AddValue("errorRate", "丢包率", errorRate);
+  cmd.AddValue("delay", "链路时延", delay);
+  cmd.AddValue("interval", "HTTP 请求间隔 (s)", interval);
+  cmd.AddValue("nRuns", "重复仿真次数", nRuns);
   cmd.Parse(argc, argv);
-  std::cout << "bandwidth,throughput_mean,throughput_std,complete_rate_mean,complete_rate_std,avg_delay_ms_mean,avg_delay_ms_std,lost_mean\n";
-  for (const auto& dataRate : dataRates) {
-    std::vector<double> throughputs, completeRates, avgDelayMss;
-    std::vector<uint32_t> losts;
-    for (uint32_t run = 0; run < nRuns; ++run) {
-      double t, c, d;
-      uint32_t l;
-      RunSimulation(dataRate, nRequests, respSize, reqSize, httpPort, errorRate, delay, interval, t, c, d, l);
-      throughputs.push_back(t);
-      completeRates.push_back(c);
-      avgDelayMss.push_back(d);
-      losts.push_back(l);
+
+  for (uint32_t run = 0; run < nRuns; ++run) {
+    FlowMonitorHelper flowmonHelper;
+    Ptr<FlowMonitor> flowmon;
+    double d;
+    NodeContainer nodes;
+    nodes.Create(2);
+    PointToPointHelper p2p;
+    p2p.SetDeviceAttribute("DataRate", StringValue(dataRate));
+    p2p.SetChannelAttribute("Delay", StringValue(delay));
+    NetDeviceContainer devices = p2p.Install(nodes);
+    InternetStackHelper stack;
+    stack.Install(nodes);
+    Ipv4AddressHelper address;
+    address.SetBase("10.1.1.0", "255.255.255.0");
+    Ipv4InterfaceContainer interfaces = address.Assign(devices);
+    Ptr<HttpServerApp> serverApp = CreateObject<HttpServerApp>();
+    serverApp->Setup(httpPort, respSize, nRequests);
+    nodes.Get(1)->AddApplication(serverApp);
+    serverApp->SetStartTime(Seconds(0.5));
+    serverApp->SetStopTime(Seconds(60.0));
+    Ptr<HttpClientApp> clientApp = CreateObject<HttpClientApp>();
+    clientApp->Setup(interfaces.GetAddress(1), httpPort, reqSize, nRequests, interval);
+    nodes.Get(0)->AddApplication(clientApp);
+    clientApp->SetStartTime(Seconds(1.0));
+    clientApp->SetStopTime(Seconds(60.0));
+    Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
+    em->SetAttribute("ErrorRate", DoubleValue(errorRate));
+    em->SetAttribute("ErrorUnit", StringValue("ERROR_UNIT_PACKET"));
+    devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
+    devices.Get(0)->TraceConnectWithoutContext("PhyTxEnd", MakeCallback(&TxTrace));
+    devices.Get(1)->TraceConnectWithoutContext("PhyRxEnd", MakeCallback(&RxTrace));
+    flowmon = flowmonHelper.InstallAll();
+    Simulator::Stop(Seconds(65.0));
+    Simulator::Run();
+    const auto& sendTimes = clientApp->GetReqSendTimes();
+    const auto& recvTimes = clientApp->GetRespRecvTimes();
+    double totalDelay = 0.0;
+    size_t nDone = std::min(sendTimes.size(), recvTimes.size());
+    for (size_t i = 0; i < nDone; ++i) {
+      totalDelay += (recvTimes[i] - sendTimes[i]);
     }
-    auto mean = [](const std::vector<double>& v) {
-      return std::accumulate(v.begin(), v.end(), 0.0) / v.size();
-    };
-    auto stddev = [](const std::vector<double>& v) {
-      double m = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
-      double s = 0.0; for (auto x : v) s += (x-m)*(x-m);
-      return sqrt(s/v.size());
-    };
-    double t_mean = mean(throughputs), t_std = stddev(throughputs);
-    double c_mean = mean(completeRates), c_std = stddev(completeRates);
-    double d_mean = mean(avgDelayMss), d_std = stddev(avgDelayMss);
-    double l_mean = std::accumulate(losts.begin(), losts.end(), 0.0) / losts.size();
-    std::cout << dataRate << "," << t_mean << "," << t_std << "," << c_mean << "," << c_std << "," << d_mean << "," << d_std << "," << l_mean << std::endl;
+    d = nDone > 0 ? (totalDelay / nDone) : 0.0; // 单位: 秒
+    delays.push_back(d * 1000); // ms
+    Simulator::Destroy();
   }
+  // 计算均值和标准差
+  double mean = std::accumulate(delays.begin(), delays.end(), 0.0) / delays.size();
+  double sq_sum = 0.0;
+  for (auto v : delays) sq_sum += (v - mean) * (v - mean);
+  double stddev = delays.size() > 1 ? std::sqrt(sq_sum / (delays.size() - 1)) : 0.0;
+  std::cout << dataRate << "," << mean << "," << stddev << std::endl;
   return 0;
 }
