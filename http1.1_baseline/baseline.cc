@@ -155,11 +155,12 @@ int main(int argc, char *argv[]) {
     std::string delay = "5ms";
     std::string dataRate = "10Mbps";
     double errorRate = 0.0;
-    uint32_t nRequests = 50;
+    uint32_t nRequests = 200;
     uint32_t respSize = 100*1024;
     uint32_t reqSize = 100;
     uint16_t httpPort = 8080;
     double interval = 0.01;
+    uint32_t nConnections = 1;
 
     CommandLine cmd;
     cmd.AddValue("delay", "Link delay", delay);
@@ -170,6 +171,7 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("reqSize", "HTTP request size (bytes)", reqSize);
     cmd.AddValue("httpPort", "HTTP server port", httpPort);
     cmd.AddValue("interval", "Interval between HTTP requests (s)", interval);
+    cmd.AddValue("nConnections", "Number of concurrent connections", nConnections);
     cmd.Parse(argc, argv);
 
     NodeContainer nodes; nodes.Create(2);
@@ -183,7 +185,25 @@ int main(int argc, char *argv[]) {
     address.SetBase("10.1.1.0", "255.255.255.0");
     Ipv4InterfaceContainer interfaces = address.Assign(devices);
 
-    SetupApplications(nodes, interfaces, httpPort, respSize, nRequests, reqSize, interval);
+    // 多连接并发客户端
+    std::vector<Ptr<HttpClientApp>> clientApps;
+    uint32_t baseReqs = nRequests / nConnections;
+    uint32_t rem = nRequests % nConnections;
+    for (uint32_t i = 0; i < nConnections; ++i) {
+        uint32_t reqs = baseReqs + (i < rem ? 1 : 0);
+        Ptr<HttpClientApp> app = CreateObject<HttpClientApp>();
+        app->Setup(interfaces.GetAddress(1), httpPort, reqSize, reqs, interval);
+        nodes.Get(0)->AddApplication(app);
+        app->SetStartTime(Seconds(1.0 + i * 0.01));
+        app->SetStopTime(Seconds(30.0));
+        clientApps.push_back(app);
+    }
+    // 服务端
+    Ptr<HttpServerApp> serverApp = CreateObject<HttpServerApp>();
+    serverApp->Setup(httpPort, respSize, nRequests);
+    nodes.Get(1)->AddApplication(serverApp);
+    serverApp->SetStartTime(Seconds(0.5));
+    serverApp->SetStopTime(Seconds(30.0));
 
     Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
     em->SetAttribute("ErrorRate", DoubleValue(errorRate));
@@ -203,9 +223,16 @@ int main(int argc, char *argv[]) {
     Simulator::Stop(Seconds(35.0));
     Simulator::Run();
 
-    // 统计输出
-    const auto& sendTimes = clientApp->GetReqSendTimes();
-    const auto& recvTimes = clientApp->GetRespRecvTimes();
+    // 聚合所有 clientApps 的发送/接收时间
+    std::vector<double> sendTimes, recvTimes;
+    for (const auto& app : clientApps) {
+        const auto& s = app->GetReqSendTimes();
+        const auto& r = app->GetRespRecvTimes();
+        sendTimes.insert(sendTimes.end(), s.begin(), s.end());
+        recvTimes.insert(recvTimes.end(), r.begin(), r.end());
+    }
+    std::sort(sendTimes.begin(), sendTimes.end());
+    std::sort(recvTimes.begin(), recvTimes.end());
     double totalDelay = 0.0;
     size_t nDone = std::min(sendTimes.size(), recvTimes.size());
     for (size_t i = 0; i < nDone; ++i) {
@@ -217,8 +244,8 @@ int main(int argc, char *argv[]) {
     double totalTime = nDone > 0 ? (recvTimes[nDone-1] - sendTimes[0]) : 1;
     double throughput = (totalBytes * 8) / (totalTime * 1e6); // Mbps
 
-    std::cout << "delay,dataRate,errorRate,nRequests,respSize,reqSize,httpPort,interval,avgDelay,completeRate,throughput\n";
-    std::cout << delay << "," << dataRate << "," << errorRate << "," << nRequests << "," << respSize << "," << reqSize << "," << httpPort << "," << interval << "," << avgDelay << "," << completeRate << "," << throughput << std::endl;
+    std::cout << "delay,dataRate,errorRate,nRequests,respSize,reqSize,httpPort,interval,nConnections,avgDelay,completeRate,throughput\n";
+    std::cout << delay << "," << dataRate << "," << errorRate << "," << nRequests << "," << respSize << "," << reqSize << "," << httpPort << "," << interval << "," << nConnections << "," << avgDelay << "," << completeRate << "," << throughput << std::endl;
 
     flowmon->CheckForLostPackets();
     flowmon->SerializeToXmlFile("flowmon.xml", true, true);
