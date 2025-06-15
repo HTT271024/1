@@ -24,6 +24,7 @@
 !http1.1_baseline/
 !http1.1_jitter/
 !http1.1_lose/
+!http1.1_loss/
 
 !http2/
 !http2_bandwidth/
@@ -36,6 +37,7 @@
 !http3_baseline/
 !http3_jitter/
 !http3_lose/
+!new/
 !nested-subdir/
 !subdir/
 !scratch-simulator.cc
