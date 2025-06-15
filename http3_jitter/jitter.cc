@@ -13,7 +13,7 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("Http3JitterSim");
 
 int main(int argc, char *argv[]) {
-    double jitter = 0.0;  // 默认抖动为0
+    double jitter = 0.0;  // Default jitter is 0
     CommandLine cmd;
     cmd.AddValue("jitter", "Network jitter in milliseconds", jitter);
     cmd.Parse(argc, argv);
@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
     p2p.SetChannelAttribute("Delay", StringValue("10ms"));
     NetDeviceContainer devices = p2p.Install(nodes);
 
-    // 使用 BurstErrorModel 来模拟网络抖动
+    // Use BurstErrorModel to simulate network jitter
     Ptr<BurstErrorModel> em = CreateObject<BurstErrorModel>();
-    // 将抖动值转换为丢包率（抖动越大，丢包率越高）
-    double errorRate = jitter / 1000.0;  // 转换为秒
+    // Convert jitter value to error rate (higher jitter, higher loss rate)
+    double errorRate = jitter / 1000.0;  // Convert to seconds
     em->SetAttribute("ErrorRate", DoubleValue(errorRate));
     em->SetAttribute("BurstSize", StringValue("ns3::UniformRandomVariable[Min=1|Max=3]"));
     devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
     for (uint32_t i = 0; i < numStreams; ++i) {
         uint16_t port = 9000 + i;
-        // 用UDP模拟QUIC
+        // Use UDP to simulate QUIC
         OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
         onoff.SetConstantRate(DataRate(bandwidth), packetSize);
         onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
@@ -70,12 +70,12 @@ int main(int argc, char *argv[]) {
         sinkPtrs.push_back(DynamicCast<PacketSink>(sinkApp.Get(0)));
     }
 
-    // 实时监控每个流
+    // Real-time monitoring for each stream
     for (int t = 1; t <= duration + 1; ++t) {
         Simulator::Schedule(Seconds(t), [sinkPtrs, t]() {
             std::cout << "At " << t << "s:";
             for (size_t i = 0; i < sinkPtrs.size(); ++i) {
-                std::cout << " 流" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() << " bytes";
+                std::cout << " Stream" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() << " bytes";
             }
             std::cout << std::endl;
         });
@@ -84,12 +84,12 @@ int main(int argc, char *argv[]) {
     Simulator::Stop(Seconds(1.0 + duration + 1));
     Simulator::Run();
 
-    // 计算吞吐量
-    std::cout << "\n✅ 最终各流总接收: ";
+    // Calculate throughput
+    std::cout << "\n✅ Final total received for each stream: ";
     for (size_t i = 0; i < sinkPtrs.size(); ++i) {
         double throughput = sinkPtrs[i]->GetTotalRx() * 8.0 / duration / 1000.0; // kbps
-        std::cout << "流" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() 
-                 << " bytes (吞吐量=" << throughput << " kbps); ";
+        std::cout << "Stream" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx()
+                 << " bytes (throughput=" << throughput << " kbps); ";
     }
     std::cout << std::endl;
 

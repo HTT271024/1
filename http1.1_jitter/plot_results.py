@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # 设置工作目录
-os.chdir('/home/ekko/ns-3-dev-new/scratch/new')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def extract_metrics(file_path):
     with open(file_path, 'r') as f:
@@ -81,7 +81,7 @@ def process_results():
 def plot_results(results):
     # 设置图表风格
     sns.set_style("whitegrid")
-    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['font.sans-serif'] = ['DejaVu Sans']  # 使用系统默认字体
     plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
     
     # 创建图表

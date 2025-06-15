@@ -44,11 +44,11 @@ public:
     }
 
     void PrintResults(double duration, const std::string& bandwidth, double delay, double loss) {
-        std::cout << "\n=== 测试结果 ===" << std::endl;
+        std::cout << "\n=== Test Results ===" << std::endl;
         double totalThroughput = 0;
         double totalTxThroughput = 0;
         
-        // 打印每个流的详细信息
+        // Print detailed info for each stream
         for (size_t i = 0; i < sinkPtrs.size(); ++i) {
             uint64_t totalRx = sinkPtrs[i]->GetTotalRx();
             double rxThroughput = totalRx * 8.0 / duration / 1000.0; // kbps
@@ -56,44 +56,44 @@ public:
             totalThroughput += rxThroughput;
             totalTxThroughput += txThroughput;
             
-            std::cout << "流" << (i+1) << ":" << std::endl
-                     << "  接收: " << totalRx << " bytes (" << std::fixed << std::setprecision(2) 
+            std::cout << "Stream " << (i+1) << ":" << std::endl
+                     << "  Received: " << totalRx << " bytes (" << std::fixed << std::setprecision(2) 
                      << rxThroughput << " kbps)" << std::endl
-                     << "  发送: " << totalTxBytes[i] << " bytes (" << std::fixed << std::setprecision(2)
+                     << "  Sent: " << totalTxBytes[i] << " bytes (" << std::fixed << std::setprecision(2)
                      << txThroughput << " kbps)" << std::endl;
         }
 
-        // 打印总体统计
-        std::cout << "\n总体统计:" << std::endl
-                 << "  总接收吞吐量: " << std::fixed << std::setprecision(2) << totalThroughput << " kbps" << std::endl
-                 << "  总发送吞吐量: " << std::fixed << std::setprecision(2) << totalTxThroughput << " kbps" << std::endl
-                 << "  网络参数: " << bandwidth << ", " << delay << "ms, " << (loss * 100) << "%" << std::endl;
+        // Print overall statistics
+        std::cout << "\nOverall Statistics:" << std::endl
+                 << "  Total received throughput: " << std::fixed << std::setprecision(2) << totalThroughput << " kbps" << std::endl
+                 << "  Total sent throughput: " << std::fixed << std::setprecision(2) << totalTxThroughput << " kbps" << std::endl
+                 << "  Network parameters: " << bandwidth << ", " << delay << "ms, " << (loss * 100) << "%" << std::endl;
 
-        // 打印流监控统计
+        // Print flow monitor statistics
         flowMonitor->CheckForLostPackets();
         Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
         FlowMonitor::FlowStatsContainer stats = flowMonitor->GetFlowStats();
         
-        std::cout << "\n流监控统计:" << std::endl;
+        std::cout << "\nFlow Monitor Statistics:" << std::endl;
         for (auto &stat : stats) {
-            std::cout << "  流 " << stat.first << ":" << std::endl
-                     << "    丢包数: " << stat.second.lostPackets << std::endl
-                     << "    平均延迟: " << stat.second.delaySum.GetSeconds() / stat.second.rxPackets << "s" << std::endl
-                     << "    抖动: " << stat.second.jitterSum.GetSeconds() / stat.second.rxPackets << "s" << std::endl;
+            std::cout << "  Flow " << stat.first << ":" << std::endl
+                     << "    Lost packets: " << stat.second.lostPackets << std::endl
+                     << "    Average delay: " << stat.second.delaySum.GetSeconds() / stat.second.rxPackets << "s" << std::endl
+                     << "    Jitter: " << stat.second.jitterSum.GetSeconds() / stat.second.rxPackets << "s" << std::endl;
         }
     }
 };
 
 int main(int argc, char *argv[]) {
-    // 默认参数
+    // Default parameters
     std::string bandwidth = "10Mbps";
     double delay = 10.0;  // ms
     double loss = 0.0;    // 0%
     uint32_t packetSize = 1200; // QUIC typical MTU
     uint32_t numStreams = 3;
-    double duration = 30.0;  // 模拟时间
-    double startTime = 1.0;  // 开始时间
-    double stopTime = startTime + duration;  // 结束时间
+    double duration = 30.0;  // Simulation time
+    double startTime = 1.0;  // Start time
+    double stopTime = startTime + duration;  // End time
 
     CommandLine cmd;
     cmd.AddValue("bandwidth", "Link bandwidth", bandwidth);
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("loss", "Packet loss rate (0-1)", loss);
     cmd.Parse(argc, argv);
 
-    // 启用日志
+    // Enable logging
     LogComponentEnable("Http3BaselineSim", LOG_LEVEL_WARN);
     LogComponentEnable("OnOffApplication", LOG_LEVEL_WARN);
     LogComponentEnable("PacketSink", LOG_LEVEL_WARN);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("1000p"));
     NetDeviceContainer devices = p2p.Install(nodes);
 
-    // 设置丢包模型
+    // Set packet loss model
     if (loss > 0) {
         Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
         em->SetAttribute("ErrorRate", DoubleValue(loss));
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
     std::vector<ApplicationContainer> senders, sinks;
     Http3Simulator simulator(startTime, stopTime);
 
-    // 计算每条流的速率
+    // Calculate per-stream rate
     std::string bwValue = bandwidth.substr(0, bandwidth.size() - 4);
     double bwNum = std::stod(bwValue);
     double perStreamBw = bwNum / numStreams;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     for (uint32_t i = 0; i < numStreams; ++i) {
         uint16_t port = 9000 + i;
         
-        // 创建并启动接收端
+        // Create and start receiver
         PacketSinkHelper sink("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), port));
         ApplicationContainer sinkApp = sink.Install(nodes.Get(1));
         sinkApp.Start(Seconds(startTime - 0.5));
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
         Ptr<PacketSink> sinkPtr = DynamicCast<PacketSink>(sinkApp.Get(0));
         simulator.AddSink(sinkPtr);
 
-        // 创建并启动发送端
+        // Create and start sender
         OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
         onoff.SetConstantRate(DataRate(perStreamBwStr), packetSize);
         onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
         sender.Stop(Seconds(stopTime));
         senders.push_back(sender);
 
-        // 监控发送端的数据
+        // Monitor sender data
         Ptr<OnOffApplication> onoffApp = DynamicCast<OnOffApplication>(sender.Get(0));
         onoffApp->TraceConnectWithoutContext("Tx", MakeCallback(&Http3Simulator::UpdateTxBytes, &simulator, i));
     }
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
     Simulator::Stop(Seconds(stopTime + 1));
     Simulator::Run();
 
-    // 打印结果
+    // Print results
     simulator.PrintResults(duration, bandwidth, delay, loss);
 
     Simulator::Destroy();

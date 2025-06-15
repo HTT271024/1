@@ -2,13 +2,13 @@
 
 mkdir -p scratch/http2_jitter
 
-# 创建CSV文件并写入表头
+# Create CSV file and write header
 echo "jitter,throughput" > jitter_vs_throughput.csv
 
-# 定义要测试的抖动值（毫秒）
+# Define jitter values to test (in milliseconds)
 jitters=("0" "1" "5" "10" "20" "50")
 
-# 循环测试每个抖动值
+# Loop through each jitter value
 for jitter in "${jitters[@]}"
 do
     echo "Testing with jitter: $jitter ms"

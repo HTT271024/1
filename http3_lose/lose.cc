@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> summaryResults;
 
     for (double loss : lossRates) {
-        std::cout << "\n=== 测试丢包率 = " << (loss * 100) << "% ===" << std::endl;
+        std::cout << "\n=== Test loss rate = " << (loss * 100) << "% ===" << std::endl;
 
         NodeContainer nodes;
         nodes.Create(2);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         p2p.SetChannelAttribute("Delay", StringValue("10ms"));
         NetDeviceContainer devices = p2p.Install(nodes);
 
-        // 使用 BurstErrorModel 来模拟更真实的丢包情况
+        // Use BurstErrorModel to simulate more realistic packet loss
         Ptr<BurstErrorModel> em = CreateObject<BurstErrorModel>();
         em->SetAttribute("ErrorRate", DoubleValue(loss));
         em->SetAttribute("BurstSize", StringValue("ns3::UniformRandomVariable[Min=1|Max=3]"));
@@ -79,16 +79,16 @@ int main(int argc, char *argv[]) {
         std::ostringstream oss;
         for (size_t i = 0; i < sinkPtrs.size(); ++i) {
             double throughput = sinkPtrs[i]->GetTotalRx() * 8.0 / duration / 1000.0; // kbps
-            std::cout << "流" << (i+1) << "总接收: " << sinkPtrs[i]->GetTotalRx() << " bytes, 平均吞吐量: " << throughput << " kbps" << std::endl;
-            oss << "流" << (i+1) << "总接收=" << sinkPtrs[i]->GetTotalRx() << ", 吞吐量=" << throughput << " kbps; ";
+            std::cout << "Stream" << (i+1) << " total received: " << sinkPtrs[i]->GetTotalRx() << " bytes, average throughput: " << throughput << " kbps" << std::endl;
+            oss << "Stream" << (i+1) << " total received=" << sinkPtrs[i]->GetTotalRx() << ", throughput=" << throughput << " kbps; ";
         }
-        oss << "丢包率=" << (loss * 100) << "%";
+        oss << "Loss rate=" << (loss * 100) << "%";
         summaryResults.push_back(oss.str());
 
         Simulator::Destroy();
     }
 
-    std::cout << "\n===== 汇总结果 =====" << std::endl;
+    std::cout << "\n===== Summary Results =====" << std::endl;
     for (const auto& line : summaryResults) {
         std::cout << line << std::endl;
     }

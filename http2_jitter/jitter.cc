@@ -105,7 +105,7 @@ private:
 int main(int argc, char *argv[]) {
   double jitter = 0.0;
   uint32_t payloadSize = 1000;  // 1KB
-  uint32_t nStreams = 20;       // 20 个并发流
+  uint32_t nStreams = 20;       // 20 concurrent streams
   CommandLine cmd;
   cmd.AddValue("jitter", "Application layer jitter (ms)", jitter);
   cmd.Parse(argc, argv);

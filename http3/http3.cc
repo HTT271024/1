@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
     CommandLine cmd;
     cmd.Parse(argc, argv);
 
+
     std::string bandwidth = "10Mbps";
     double loss = 0.01;
     uint32_t packetSize = 1200; // QUIC typical MTU
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     for (uint32_t i = 0; i < numStreams; ++i) {
         uint16_t port = 9000 + i;
-        // 用UDP模拟QUIC
+        // Use UDP to simulate QUIC
         OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
         onoff.SetConstantRate(DataRate(bandwidth), packetSize);
         onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
@@ -64,12 +65,12 @@ int main(int argc, char *argv[]) {
         sinkPtrs.push_back(DynamicCast<PacketSink>(sinkApp.Get(0)));
     }
 
-    // 实时监控每个流
+    // Real-time monitoring for each stream
     for (int t = 1; t <= 11; ++t) {
         Simulator::Schedule(Seconds(t), [sinkPtrs, t]() {
             std::cout << "At " << t << "s:";
             for (size_t i = 0; i < sinkPtrs.size(); ++i) {
-                std::cout << " 流" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() << " bytes";
+                std::cout << " Stream" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() << " bytes";
             }
             std::cout << std::endl;
         });
@@ -78,9 +79,9 @@ int main(int argc, char *argv[]) {
     Simulator::Stop(Seconds(11.0));
     Simulator::Run();
 
-    std::cout << "\n✅ 最终各流总接收: ";
+    std::cout << "\n✅ Finally, all streams are received: ";
     for (size_t i = 0; i < sinkPtrs.size(); ++i) {
-        std::cout << "流" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() << " bytes; ";
+        std::cout << "stream" << (i+1) << "=" << sinkPtrs[i]->GetTotalRx() << " bytes; ";
     }
     std::cout << std::endl;
 

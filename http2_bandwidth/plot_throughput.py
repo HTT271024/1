@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv("bandwidth_vs_throughput.csv")
 
-# 将带宽转换为数值（去掉Mbps）
+# Convert bandwidth to numeric value (remove Mbps)
 df['bandwidth'] = df['bandwidth'].str.replace('Mbps', '').astype(float)
 
 plt.figure(figsize=(10, 6))
@@ -14,7 +14,7 @@ plt.title("HTTP/2 Throughput vs Link Bandwidth")
 plt.grid(True)
 plt.tight_layout()
 
-# 添加理想线（45度线）
+# Add ideal line (45-degree line)
 max_bw = max(df['bandwidth'].max(), df['throughput'].max())
 plt.plot([0, max_bw], [0, max_bw], 'r--', label='Ideal Throughput')
 plt.legend()

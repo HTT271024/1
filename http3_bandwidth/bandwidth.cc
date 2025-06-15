@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
     for (uint32_t i = 0; i < numStreams; ++i) {
         uint16_t port = 9000 + i;
-        // 用UDP模拟QUIC
+        // Use UDP to simulate QUIC
         OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
         onoff.SetConstantRate(DataRate(bandwidth), packetSize);
         onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));

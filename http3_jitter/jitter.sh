@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# 创建CSV文件并写入表头
+# Create CSV file and write header
 echo "jitter,throughput" > jitter_vs_throughput.csv
 
-# 定义要测试的抖动值（毫秒）
+# Define jitter values to test (ms)
 jitters=(0 1 5 10 20 50)
 
-# 循环测试每个抖动值
+# Loop through each jitter value
 for jitter in "${jitters[@]}"
 do
     echo "Testing with jitter: $jitter ms"
-    # 运行仿真并提取吞吐量数据
+    # Run simulation and extract throughput data
     output=$(../../ns3 run "scratch/http3_jitter/jitter --jitter=$jitter")
-    throughput=$(echo $output | grep -oP '吞吐量=\K[0-9\.]+' | head -n 1)
-    # 将数据写入CSV文件
+    throughput=$(echo $output | grep -oP 'throughput=\K[0-9\.]+' | head -n 1)
+    # Write data to CSV file
     echo "$jitter,$throughput" >> jitter_vs_throughput.csv
 done
 

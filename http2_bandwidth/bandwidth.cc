@@ -94,7 +94,7 @@ private:
 int main(int argc, char *argv[]) {
   std::string bandwidth = "10Mbps";
   uint32_t payloadSize = 10000; // 10 KB
-  uint32_t nStreams = 10;       // 增加流数量以测试多路复用
+  uint32_t nStreams = 10;       // Increase number of streams to test multiplexing
   CommandLine cmd;
   cmd.AddValue("bandwidth", "Link bandwidth", bandwidth);
   cmd.Parse(argc, argv);

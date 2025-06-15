@@ -73,7 +73,7 @@ public:
   }
 
   void HandleSend(Ptr<Socket> socket, uint32_t available) {
-    if (Simulator::Now().GetSeconds() >= 59.0) return;  // 模拟停止前不再发
+    if (Simulator::Now().GetSeconds() >= 59.0) return;  // Stop sending before simulation ends
 
     if (available > 0) {
       std::string payload(m_payloadSize, 'x');
@@ -92,7 +92,7 @@ private:
 int main(int argc, char *argv[]) {
   double errorRate = 0.01;
   uint32_t payloadSize = 10000; // 10 KB
-  uint32_t nStreams = 5;        // 减少流数量
+  uint32_t nStreams = 5;        // Reduce number of streams
   CommandLine cmd;
   cmd.AddValue("errorRate", "Packet loss rate", errorRate);
   cmd.Parse(argc, argv);
@@ -122,13 +122,13 @@ int main(int argc, char *argv[]) {
   Ptr<SimpleHttp2Server> serverApp = CreateObject<SimpleHttp2Server>(&totalBytes);
   nodes.Get(1)->AddApplication(serverApp);
   serverApp->SetStartTime(Seconds(0.0));
-  serverApp->SetStopTime(Seconds(60.0));  // 增加仿真时间
+  serverApp->SetStopTime(Seconds(60.0));  // Increase simulation time
 
   Ptr<SimpleHttp2Client> clientApp = CreateObject<SimpleHttp2Client>();
   clientApp->Setup(InetSocketAddress(interfaces.GetAddress(1), 8080), payloadSize, nStreams);
   nodes.Get(0)->AddApplication(clientApp);
   clientApp->SetStartTime(Seconds(1.0));
-  clientApp->SetStopTime(Seconds(60.0));  // 增加仿真时间
+  clientApp->SetStopTime(Seconds(60.0));  // Increase simulation time
 
   Simulator::Run();
   Simulator::Destroy();

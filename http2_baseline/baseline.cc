@@ -72,12 +72,12 @@ public:
     Ptr<Packet> packet = Create<Packet>((uint8_t*)payload.data(), payload.size());
     
     if (m_isHttp2) {
-      // HTTP/2: 并发发送多个流
+      // HTTP/2: Send multiple streams concurrently
       for (uint32_t i = 0; i < m_nStreams; ++i) {
         m_socket->Send(packet);
       }
     } else {
-      // HTTP/1.1: 串行发送
+      // HTTP/1.1: Send sequentially
       m_socket->Send(packet);
     }
   }
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
   double errorRate = 0.0;
   bool isHttp2 = true;
   uint32_t payloadSize = 10000; // 10 KB
-  uint32_t nStreams = 10;       // HTTP/2 的并发流数量
+  uint32_t nStreams = 10;       // Number of concurrent streams for HTTP/2
   CommandLine cmd;
   cmd.AddValue("errorRate", "Packet loss rate", errorRate);
   cmd.AddValue("isHttp2", "Whether to use HTTP/2", isHttp2);
