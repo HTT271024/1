@@ -12,6 +12,7 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("Http1Dot1Sim");
 
+//Data packet tracking function
 static void TxTrace(Ptr<const Packet> packet) {
   std::cout << "[Trace] Packet sent, size=" << packet->GetSize() << std::endl;
 }
@@ -19,11 +20,13 @@ static void RxTrace(Ptr<const Packet> packet) {
   std::cout << "[Trace] Packet received, size=" << packet->GetSize() << std::endl;
 }
 
+
 class HttpServerApp : public Application {
 public:
+//Constructors and destructors
   HttpServerApp() : m_socket(0), m_port(0) {}
   virtual ~HttpServerApp() { m_socket = 0; }
-
+//Setup function
   void Setup(uint16_t port, uint32_t respSize, uint32_t maxReqs) {
     m_port = port;
     m_respSize = respSize;
@@ -39,14 +42,17 @@ private:
     m_socket->SetAcceptCallback(MakeNullCallback<bool, Ptr<Socket>, const Address &>(),
                                 MakeCallback(&HttpServerApp::HandleAccept, this));
   }
+
   virtual void StopApplication() override {
     if (m_socket) m_socket->Close();
   }
+  //HandleAccept function
   void HandleAccept(Ptr<Socket> s, const Address &from) {
     s->SetRecvCallback(MakeCallback(&HttpServerApp::HandleRead, this));
     m_clientSocket = s;
     m_reqsHandled = 0;
   }
+  //HandleRead function
   void HandleRead(Ptr<Socket> s) {
     Ptr<Packet> packet = s->Recv();
     if (packet->GetSize() > 0 && m_reqsHandled < m_maxReqs) {
@@ -63,13 +69,15 @@ private:
       NS_LOG_INFO("[Server] Sent response " << m_reqsHandled << ", size=" << m_respSize);
     }
   }
-  Ptr<Socket> m_socket;
-  Ptr<Socket> m_clientSocket;
-  uint16_t m_port;
-  uint32_t m_respSize;
-  uint32_t m_maxReqs;
-  uint32_t m_reqsHandled = 0;
+  //Member variables of the server class
+  Ptr<Socket> m_socket; //Server socket
+  Ptr<Socket> m_clientSocket; //Client socket
+  uint16_t m_port; // Port number
+  uint32_t m_respSize;// Response size
+  uint32_t m_maxReqs; // Maximum number of requests
+  uint32_t m_reqsHandled = 0; //The number of processed requests
 };
+
 
 // ===================== HTTP/1.1 Client =====================
 class HttpClientApp : public Application {
@@ -175,16 +183,17 @@ private:
 };
 
 // ===================== Main =====================
+
 int main(int argc, char *argv[]) {
-  uint32_t nRequests = 200;  // 总请求数
-  uint32_t respSize = 100*1024; // 100KB per response
-  uint32_t reqSize = 100; // 请求报文大小
-  uint16_t httpPort = 8080;
-  double errorRate = 0.01;
-  std::string dataRate = "10Mbps";
-  std::string delay = "5ms";
-  double interval = 0.01;
-  uint32_t nConnections = 1; // 新增：并发连接数，默认1
+  uint32_t nRequests = 200;     // 总请求数：控制要发送多少个HTTP请求
+  uint32_t respSize = 100*1024; // 响应大小：服务器返回的数据大小（默认100KB）
+  uint32_t reqSize = 100;       // 请求大小：客户端发送的请求大小
+  uint16_t httpPort = 8080;     // HTTP端口：服务器监听的端口号
+  double errorRate = 0.01;      // 丢包率：1%的丢包率
+  std::string dataRate = "10Mbps"; // 带宽：网络链路带宽
+  std::string delay = "5ms";    // 延迟：网络链路延迟
+  double interval = 0.01;       // 请求间隔：每个请求之间的时间间隔（秒）
+  uint32_t nConnections = 1;    // 并发连接数：同时建立的HTTP连接数
 
   CommandLine cmd;
   cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
@@ -277,9 +286,9 @@ int main(int argc, char *argv[]) {
     double totalBytes = nDone * respSize;
     double totalTime = recvTimes[nDone-1] - sendTimes[0];
     double throughput = (totalBytes * 8) / (totalTime * 1e6); // Mbps
-    std::cout << "HTTP/1.1 实验结束，客户端共收到响应数: " << totalResps << "/" << nRequests << std::endl;
-    std::cout << "HTTP/1.1 平均延迟: " << avgDelay << " s" << std::endl;
-    std::cout << "HTTP/1.1 平均吞吐量: " << throughput << " Mbps" << std::endl;
+    std::cout << "The HTTP/1.1 experiment has ended. The total number of responses received by the client is: " << totalResps << "/" << nRequests << std::endl;
+    std::cout << "Average delay of HTTP/1.1: " << avgDelay << " s" << std::endl;
+    std::cout << "Average throughput of HTTP/1.1: " << throughput << " Mbps" << std::endl;
     // --- 新增：页面加载时间 ---
     double startTime = sendTimes[0];
     double endTime = recvTimes[nDone-1];

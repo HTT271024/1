@@ -18,7 +18,7 @@ do
             echo "Testing with bandwidth=$bw, delay=${delay}ms, loss=$loss"
             # Run simulation and extract throughput data
             output=$(../../ns3 run "scratch/http3_baseline/baseline --bandwidth=$bw --delay=$delay --loss=$loss")
-            throughput=$(echo "$output" | grep -E "总接收吞吐量:|total_throughput:" | grep -oP '\d+(\.\d+)?')
+            throughput=$(echo "$output" | grep -E "total throughput:" | grep -oP '\d+(\.\d+)?')
             # Write data to CSV file
             echo "$bw,$delay,$loss,$throughput" >> baseline_results.csv
         done

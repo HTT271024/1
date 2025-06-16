@@ -281,9 +281,10 @@ int main(int argc, char *argv[]) {
     double totalBytes = nDone * respSize;
     double totalTime = recvTimes[nDone-1] - sendTimes[0];
     double throughput = (totalBytes * 8) / (totalTime * 1e6); // Mbps
-    std::cout << "HTTP/1.1 实验结束，客户端共收到响应数: " << totalResps << "/" << nRequests << std::endl;
-    std::cout << "HTTP/1.1 平均延迟: " << avgDelay << " s" << std::endl;
-    std::cout << "HTTP/1.1 平均吞吐量: " << throughput << " Mbps" << std::endl;
+    std::cout << "The HTTP/1.1 experiment has ended. The total number of responses received by the client is: " << totalResps << "/" << nRequests << std::endl;
+    std::cout << "Average delay of HTTP/1.1: " << avgDelay << " s" << std::endl;
+    std::cout << "Average throughput of HTTP/1.1:" << throughput << " Mbps" << std::endl;
+
     // --- 新增：页面加载时间 ---
     double startTime = sendTimes[0];
     double endTime = recvTimes[nDone-1];

@@ -148,15 +148,15 @@ private:
 };
 
 static void TxTrace(Ptr<const Packet> p) {
-  std::cout << "[Trace] 发送数据包: " << p->GetSize() << " bytes" << std::endl;
+  std::cout << "[Trace] Packet sent: " << p->GetSize() << " bytes" << std::endl;
 }
 static void RxTrace(Ptr<const Packet> p) {
-  std::cout << "[Trace] 接收数据包: " << p->GetSize() << " bytes" << std::endl;
+  std::cout << "[Trace] Packet received: " << p->GetSize() << " bytes" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
   std::string dataRate = "10Mbps";
-  uint32_t nRequests = 100;
+  uint32_t nRequests = 200;
   uint32_t respSize = 100*1024;
   uint32_t reqSize = 100;
   uint16_t httpPort = 8080;
@@ -166,15 +166,15 @@ int main(int argc, char *argv[]) {
   uint32_t nRuns = 5;
   std::vector<double> delays;
   CommandLine cmd;
-  cmd.AddValue("dataRate", "链路带宽", dataRate);
-  cmd.AddValue("nRequests", "HTTP 请求数", nRequests);
-  cmd.AddValue("respSize", "HTTP 响应大小 (bytes)", respSize);
-  cmd.AddValue("reqSize", "HTTP 请求大小 (bytes)", reqSize);
-  cmd.AddValue("httpPort", "HTTP 服务器端口", httpPort);
-  cmd.AddValue("errorRate", "丢包率", errorRate);
-  cmd.AddValue("delay", "链路时延", delay);
-  cmd.AddValue("interval", "HTTP 请求间隔 (s)", interval);
-  cmd.AddValue("nRuns", "重复仿真次数", nRuns);
+  cmd.AddValue("dataRate", "Link bandwidth", dataRate);
+  cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
+  cmd.AddValue("respSize", "HTTP response size (bytes)", respSize);
+  cmd.AddValue("reqSize", "HTTP request size (bytes)", reqSize);
+  cmd.AddValue("httpPort", "HTTP server port", httpPort);
+  cmd.AddValue("errorRate", "Packet loss rate", errorRate);
+  cmd.AddValue("delay", "Link delay", delay);
+  cmd.AddValue("interval", "Interval between HTTP requests (s)", interval);
+  cmd.AddValue("nRuns", "Number of simulation runs", nRuns);
   cmd.Parse(argc, argv);
 
   for (uint32_t run = 0; run < nRuns; ++run) {
