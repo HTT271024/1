@@ -2,15 +2,15 @@
 set -euo pipefail
 
 NS3_ROOT="$HOME/ns-3-dev-new"
-APP_PATH="scratch/http1.1/sim"
-OUTDIR="$NS3_ROOT/scratch/http1.1"
+APP="scratch/http1.1/sim"
+OUT="$NS3_ROOT/scratch/http1.1"
 
 # Create output directory
-mkdir -p "$OUTDIR"
+mkdir -p "$OUT"
 
 # Define parameters
-BANDWIDTHS=("1Mbps" "2Mbps" "5Mbps" "10Mbps" "20Mbps")
-LATENCY="5ms"
+LATENCIES=("0ms" "50ms" "100ms" "200ms")
+BANDWIDTH="10Mbps"
 LOSS="0.01"
 N_REQUESTS="200"
 RESP_SIZE="102400"
@@ -23,15 +23,15 @@ cd "$NS3_ROOT"
 ./ns3 build
 
 # Create CSV file and write header
-CSV="$OUTDIR/summary.csv"
-echo "bandwidth,latency,loss,avg_delay_s,avg_throughput_Mbps,onload_s,retx_count,retx_rate_per_s,jitter_s,hol_events,hol_time_s" > "$CSV"
+CSV="$OUT/latency_sweep.csv"
+echo "latency,bandwidth,loss,avg_delay_s,avg_throughput_Mbps,onload_s,retx_count,retx_rate_per_s,jitter_s,hol_events,hol_time_s" > "$CSV"
 
-# Loop through each bandwidth
-for BW in "${BANDWIDTHS[@]}"; do
-    echo "Testing bandwidth: $BW"
+# Loop through each latency
+for DELAY in "${LATENCIES[@]}"; do
+    echo "Testing latency: $DELAY"
     
     # Run simulation
-    output=$(./ns3 run "$APP_PATH --dataRate=$BW --delay=$LATENCY --errorRate=$LOSS --nRequests=$N_REQUESTS --respSize=$RESP_SIZE --reqSize=$REQ_SIZE --interval=$INTERVAL --nConnections=$N_CONNECTIONS" 2>/dev/null)
+    output=$(./ns3 run "$APP --delay=$DELAY --dataRate=$BANDWIDTH --errorRate=$LOSS --nRequests=$N_REQUESTS --respSize=$RESP_SIZE --reqSize=$REQ_SIZE --interval=$INTERVAL --nConnections=$N_CONNECTIONS" 2>/dev/null)
     
     # Extract metrics using grep and awk
     avg_delay=$(echo "$output" | grep -oP 'Average delay of HTTP/1.1: \K[0-9.]+')
@@ -54,9 +54,9 @@ for BW in "${BANDWIDTHS[@]}"; do
     hol_time=${hol_time:-0}
     
     # Write data to CSV
-    echo "$BW,$LATENCY,$LOSS,$avg_delay,$avg_throughput,$onload,$retx_count,$retx_rate,$jitter,$hol_events,$hol_time" >> "$CSV"
+    echo "$DELAY,$BANDWIDTH,$LOSS,$avg_delay,$avg_throughput,$onload,$retx_count,$retx_rate,$jitter,$hol_events,$hol_time" >> "$CSV"
     
-    echo "Completed: $BW"
+    echo "Completed: $DELAY"
 done
 
-echo "All experiments completed. Results saved to: $CSV" 
+echo "All latency sweep experiments completed. Results saved to: $CSV" 

@@ -1,0 +1,16 @@
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+Flow 1 src=10.1.1.1:49153 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=0.004596 s avgJitter=0.00576 s
+Flow 2 src=10.1.1.2:8080 -> dst=10.1.1.1:49153 proto=6 rxPackets=3 avgDelay=0.00329067 s avgJitter=0.001288 s

@@ -1,0 +1,1 @@
+bandwidth,latency,loss,avg_delay_s,avg_throughput_Mbps,onload_s,retx_count,retx_rate_per_s,jitter_s,hol_events,hol_time_s

@@ -1,0 +1,6 @@
+bandwidth,avg_throughput_Mbps,onload_s
+1Mbps,1.1,1.1
+2Mbps,1.1,1.1
+5Mbps,1.1,1.1
+10Mbps,1.1,1.1
+20Mbps,1.1,1.1
