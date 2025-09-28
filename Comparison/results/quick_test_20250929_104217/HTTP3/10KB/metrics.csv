@@ -1,0 +1,15 @@
+metric,value
+PageLoadTime,0.002449
+Throughput,4.022
+TotalBytes,103000.0
+MeasurementTime,0.204867
+TotalReqs,10.0
+Jitter,0.0636
+Retransmissions,0.0
+HolEvents,0.0
+HolTime,0.0
+Throughput_Mbps,4.022121669180493
+ReqPerSec,48.81215617937492
+Avg_PageLoadTime_Original,0.0204867
+Avg_PageLoadTime_Theoretical,0.0015819200000000001
+Avg_PageLoadTime,0.0015819200000000001

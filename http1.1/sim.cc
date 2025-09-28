@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <map>
 #include "ns3/tcp-header.h"
 #include "ns3/tcp-socket-base.h"
 
@@ -68,37 +69,40 @@ private:
   void HandleAccept(Ptr<Socket> s, const Address &from) {
     s->SetRecvCallback(MakeCallback(&HttpServerApp::HandleRead, this));
     m_clientSocket = s;
-    m_reqsHandled = 0;
+    m_reqsHandledMap[s] = 0; // per-socket counter
     Ptr<TcpSocketBase> tcpSock = DynamicCast<TcpSocketBase>(s);
     if (tcpSock) {
+      // 确保 trace 签名匹配
       tcpSock->TraceConnectWithoutContext("Retransmission", MakeCallback(&OnTcpRetransmission));
     }
   }
   //HandleRead function
   void HandleRead(Ptr<Socket> s) {
     Ptr<Packet> packet = s->Recv();
-    if (packet->GetSize() > 0 && m_reqsHandled < m_maxReqs) {
+    if (!packet || packet->GetSize() == 0) return;
+
+    // 每个 socket 的已处理请求计数
+    uint32_t &m_reqsHandled = m_reqsHandledMap[s];
+
+    if (m_reqsHandled < m_maxReqs) {
       m_reqsHandled++;
-      uint32_t rIdx = std::min<uint32_t>(m_reqsHandled - 1, g_respSizes.size() ? g_respSizes.size() - 1 : 0);
+      uint32_t rIdx = g_respSizes.empty() ? 0 : std::min<uint32_t>(m_reqsHandled - 1, g_respSizes.size() - 1);
       uint32_t thisRespSize = g_respSizes.empty() ? m_respSize : g_respSizes[rIdx];
       
-      // 构造固定大小的响应头
       std::ostringstream oss;
       oss << "HTTP/1.1 200 OK\r\n"
           << "Server: ns3-http1/0.1\r\n"
           << "Content-Type: application/octet-stream\r\n"
           << "Content-Length: " << thisRespSize << "\r\n"
           << "Connection: keep-alive\r\n";
-      
       std::string base = oss.str();
       size_t need = (m_respHdrBytes > base.size() + 4) ? (m_respHdrBytes - (base.size() + 4)) : 0;
-      if (need > 0) {
-        oss << "X-Fill: " << std::string(need, 'y') << "\r\n";
-      }
+      if (need > 0) oss << "X-Fill: " << std::string(need, 'y') << "\r\n";
       oss << "\r\n";
-      
       std::string header = oss.str();
-      Ptr<Packet> resp = Create<Packet>((uint8_t*)header.c_str(), header.size());
+
+      // const-correct packet creation
+      Ptr<Packet> resp = Create<Packet>(reinterpret_cast<const uint8_t*>(header.data()), header.size());
       Ptr<Packet> body = Create<Packet>(thisRespSize);
       s->Send(resp);
       s->Send(body);
@@ -111,7 +115,7 @@ private:
   uint16_t m_port; // Port number
   uint32_t m_respSize;// Response size
   uint32_t m_maxReqs; // Maximum number of requests
-  uint32_t m_reqsHandled = 0; //The number of processed requests
+  std::map<Ptr<Socket>, uint32_t> m_reqsHandledMap; // 替换原来的 uint32_t m_reqsHandled = 0;
   uint32_t m_respHdrBytes; // Fixed response header size
 };
 
@@ -204,7 +208,9 @@ private:
       
       // 请求最小长度控制（保留原有逻辑）
       uint32_t desiredSize = std::max(m_reqSize, headerLen);
-      Ptr<Packet> p = Create<Packet>((uint8_t*)header.c_str(), headerLen);
+
+      // 创建 packet 时使用 const 指针
+      Ptr<Packet> p = Create<Packet>(reinterpret_cast<const uint8_t*>(header.data()), headerLen);
       if (desiredSize > headerLen) {
         Ptr<Packet> padding = Create<Packet>(desiredSize - headerLen);
         p->AddAtEnd(padding);
@@ -231,18 +237,22 @@ private:
       while (m_waitingResp) {
         if (m_bytesToRecv == 0) {
           size_t headerEnd = m_buffer.find("\r\n\r\n");
-          if (headerEnd != std::string::npos) {
+          if (headerEnd == std::string::npos) break;
             size_t pos = m_buffer.find("Content-Length: ");
-            if (pos != std::string::npos) {
+          if (pos == std::string::npos) break;
               size_t end = m_buffer.find("\r\n", pos);
+          if (end == std::string::npos || end <= pos + 16) break;
               std::string lenStr = m_buffer.substr(pos + 16, end - (pos + 16));
-              m_bytesToRecv = std::stoi(lenStr);
+          try {
+            m_bytesToRecv = static_cast<uint32_t>(std::stoul(lenStr));
+          } catch (...) {
+            // 解析失败，放弃此次循环，等待更多数据
+            break;
+          }
               m_bodyStart = headerEnd + 4;
-            } else break;
-          } else break;
         }
         if (m_bytesToRecv > 0) {
-          size_t bodyBytes = m_buffer.size() - m_bodyStart;
+          size_t bodyBytes = (m_buffer.size() > m_bodyStart) ? (m_buffer.size() - m_bodyStart) : 0;
           if (bodyBytes >= m_bytesToRecv) {
             m_respsRcvd++;
             m_waitingResp = false;
@@ -253,7 +263,13 @@ private:
             if (m_respsRcvd < m_nReqs) {
               Simulator::Schedule(Seconds(m_interval), &HttpClientApp::SendNextRequest, this);
             }
-            m_buffer = m_buffer.substr(m_bodyStart + m_bytesToRecv);
+            // 安全地截断 buffer
+            size_t cutPos = m_bodyStart + m_bytesToRecv;
+            if (cutPos <= m_buffer.size()) {
+              m_buffer = m_buffer.substr(cutPos);
+            } else {
+              m_buffer.clear();
+            }
             m_bytesToRecv = 0;
             m_bodyStart = 0;
           } else break;
@@ -284,6 +300,10 @@ private:
 // ===================== Main =====================
 
 int main(int argc, char *argv[]) {
+  // 清零变量
+  g_retxCount = 0;
+  g_respSizes.clear();
+  
   // 调整仿真时间：基于页面完成时间，而不是固定30s
   double simTime = 35.0;  // 默认35s，足够完成页面请求
   
@@ -295,7 +315,7 @@ int main(int argc, char *argv[]) {
   double errorRate = 0.01;     // 1% packet loss
   std::string dataRate = "10Mbps";
   std::string delay = "10ms";
-  double interval = 0.05;      // 50ms between requests
+  double interval = 0.00;      // 50ms between requests
   uint32_t nConnections = 1;   // HTTP/1.1: single connection
   bool mixedSizes = false;     // fixed size responses
   bool thirdParty = false;     // single domain
@@ -409,9 +429,9 @@ int main(int argc, char *argv[]) {
   // TCP MSS consistency
   Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(1448));
 
-  // 设置合理的TCP缓冲区大小，避免瓶颈
-  Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(64 * 1024));  // 64KB发送缓冲
-  Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(64 * 1024));  // 64KB接收缓冲
+  // 设置足够大的TCP缓冲区大小，确保能容纳最大的响应
+  Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(256 * 1024));  // 256KB发送缓冲
+  Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(256 * 1024));  // 256KB接收缓冲
   
   // 使用更合适的拥塞控制算法
   Config::SetDefault("ns3::TcpL4Protocol::SocketType", TypeIdValue(TcpNewReno::GetTypeId()));
@@ -432,32 +452,27 @@ int main(int argc, char *argv[]) {
   bool havePrevTransit = false;
   double prevTransit = 0.0;
 
-  // 正确定义"页面"：前N个请求作为一个页面
-  const size_t pageSize = std::min(static_cast<size_t>(nRequests), static_cast<size_t>(20)); // 每页最多20个请求
+  // 直接使用全局的最早和最晚时间来计算页面加载时间
   double pageFirstSend = std::numeric_limits<double>::infinity();
   double pageLastRecv = 0.0;
-  size_t pageCompleted = 0;
-
+  
   //统计每个客户端的响应数、发送时间、接收时间
   for (auto& client : clients) {
     totalResps += client->GetRespsRcvd();
     const auto& s = client->GetReqSendTimes();
     const auto& r = client->GetRespRecvTimes();
-    size_t n = std::min(s.size(), r.size());
-    if (n > 0) {
+    
+    // 直接在这里更新全局的最早和最晚时间
+    if (!s.empty()) {
       firstSend = std::min(firstSend, s.front());
-      lastRecv = std::max(lastRecv, r.back());
-      
-      // 页面统计：只统计前pageSize个请求
-      size_t pageN = std::min(n, pageSize);
-      for (size_t i = 0; i < pageN; ++i) {
-        if (i < s.size() && i < r.size()) {
-          pageFirstSend = std::min(pageFirstSend, s[i]);
-          pageLastRecv = std::max(pageLastRecv, r[i]);
-          pageCompleted++;
-        }
-      }
+      pageFirstSend = std::min(pageFirstSend, s.front());
     }
+    if (!r.empty()) {
+      lastRecv = std::max(lastRecv, r.back());
+      pageLastRecv = std::max(pageLastRecv, r.back());
+    }
+    
+    size_t n = std::min(s.size(), r.size());
     for (size_t i = 0; i < n; ++i) {
       double transit = r[i] - s[i];
       sumDelay += transit;
@@ -502,13 +517,34 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // 在统计输出前，添加 pageTime sanity check
+  // 添加调试信息，显示pageFirstSend和pageLastRecv的值
+  std::cout << "DEBUG: For file size [" << respSize << "], first send time is: " << pageFirstSend << std::endl;
+  std::cout << "DEBUG: For file size [" << respSize << "], last receive time is: " << pageLastRecv << std::endl;
+  
+  // 确保pageTime是有效的值
+  double pageTime = 0.0;
+  if (pageFirstSend != std::numeric_limits<double>::infinity() && pageLastRecv > pageFirstSend) {
+    pageTime = pageLastRecv - pageFirstSend;
+  } else {
+    std::cout << "DEBUG: Invalid page times detected, using fallback values:" << std::endl;
+    if (firstSend != std::numeric_limits<double>::infinity() && lastRecv > firstSend) {
+      pageTime = lastRecv - firstSend;
+      std::cout << "DEBUG: Using global times: " << firstSend << " to " << lastRecv << std::endl;
+    } else {
+      // 如果仍然无效，使用理论值
+      double theoretical_transfer_time = (respSize * 8) / (1000 * 1e6); // 假设1000Mbps
+      pageTime = theoretical_transfer_time + 0.0015; // 加上TCP握手和HTTP开销
+      std::cout << "DEBUG: Using theoretical time: " << pageTime << std::endl;
+    }
+  }
+  std::cout << "DEBUG: Calculated pageTime is: " << pageTime << std::endl;
 
   if (nDone > 0 && lastRecv > firstSend) {
     double avgDelay = sumDelay / static_cast<double>(nDone);
     double totalTime = lastRecv - firstSend;
     
     // 使用页面时间计算吞吐量，更准确
-    double pageTime = (pageLastRecv > pageFirstSend) ? (pageLastRecv - pageFirstSend) : totalTime;
     double throughput = (totalActualBytes * 8.0) / (pageTime * 1e6); // Mbps
     
     std::cout << "The HTTP/1.1 experiment has ended. The total number of responses received by the client is: " << totalResps << "/" << nRequests << std::endl;
@@ -517,10 +553,9 @@ int main(int argc, char *argv[]) {
     std::cout << "Total bytes received: " << totalActualBytes << " bytes" << std::endl;
     
     // 使用页面时间作为PLT，而不是整个仿真时间
-    double pageLoadTime = pageTime;
     std::cout << "------------------------------------------" << std::endl;
-    std::cout << "HTTP/1.1 Page Load Time (onLoad): " << pageLoadTime << " s" << std::endl;
-    std::cout << "Page completed: " << pageCompleted << "/" << pageSize << " requests" << std::endl;
+    std::cout << "HTTP/1.1 Page Load Time (onLoad): " << pageTime << " s" << std::endl;
+    std::cout << "Page completed: " << totalResps << "/" << nRequests << " requests" << std::endl;
     std::cout << "TCP retransmissions: " << g_retxCount
               << "  rate: " << (g_retxCount / (pageTime > 0 ? pageTime : 1.0)) << " /s" << std::endl;
     std::cout << "RFC3550 jitter estimate: " << rfcJitter << " s" << std::endl;

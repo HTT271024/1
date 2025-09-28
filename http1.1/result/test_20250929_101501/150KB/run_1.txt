@@ -1,0 +1,97 @@
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=58
+[Trace] Packet received, size=58
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=1078
+[Trace] Packet received, size=54
+[Trace] Packet received, size=1078
+[Trace] Packet sent, size=54
+[Trace] Packet sent, size=318
+[Trace] Packet received, size=54
+[Trace] Packet received, size=318
+[Trace] Packet sent, size=54
+[Trace] Packet received, size=54
+Flow 1 src=10.1.1.1:49153 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=2.596e-06 s avgJitter=5.76e-06 s
+Flow 2 src=10.1.1.2:8080 -> dst=10.1.1.1:49153 proto=6 rxPackets=3 avgDelay=1.29067e-06 s avgJitter=1.288e-06 s
+Flow 3 src=10.1.1.1:49154 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=2.596e-06 s avgJitter=5.76e-06 s
+Flow 4 src=10.1.1.2:8080 -> dst=10.1.1.1:49154 proto=6 rxPackets=3 avgDelay=1.29067e-06 s avgJitter=1.288e-06 s
+Flow 5 src=10.1.1.1:49155 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=2.596e-06 s avgJitter=5.76e-06 s
+Flow 6 src=10.1.1.2:8080 -> dst=10.1.1.1:49155 proto=6 rxPackets=3 avgDelay=1.29067e-06 s avgJitter=1.288e-06 s
+Flow 7 src=10.1.1.1:49156 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=2.596e-06 s avgJitter=5.76e-06 s
+Flow 8 src=10.1.1.2:8080 -> dst=10.1.1.1:49156 proto=6 rxPackets=3 avgDelay=1.29067e-06 s avgJitter=1.288e-06 s
+Flow 9 src=10.1.1.1:49157 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=2.596e-06 s avgJitter=5.76e-06 s
+Flow 10 src=10.1.1.2:8080 -> dst=10.1.1.1:49157 proto=6 rxPackets=3 avgDelay=1.29067e-06 s avgJitter=1.288e-06 s
+Flow 11 src=10.1.1.1:49158 -> dst=10.1.1.2:8080 proto=6 rxPackets=4 avgDelay=2.596e-06 s avgJitter=5.76e-06 s
+Flow 12 src=10.1.1.2:8080 -> dst=10.1.1.1:49158 proto=6 rxPackets=3 avgDelay=1.29067e-06 s avgJitter=1.288e-06 s
+

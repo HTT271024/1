@@ -1,0 +1,110 @@
+{
+  "PageLoadTime": {
+    "mean": 0.161745,
+    "median": 0.161745,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 0.161745,
+    "max": 0.161745,
+    "values": [
+      0.161745
+    ]
+  },
+  "Throughput": {
+    "mean": 50.6475,
+    "median": 50.6475,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 50.6475,
+    "max": 50.6475,
+    "values": [
+      50.6475
+    ]
+  },
+  "Throughput_Mbps": {
+    "mean": 50.647624346965905,
+    "median": 50.647624346965905,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 50.647624346965905,
+    "max": 50.647624346965905,
+    "values": [
+      50.647624346965905
+    ]
+  },
+  "ReqPerSec": {
+    "mean": 123.65142662833472,
+    "median": 123.65142662833472,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 123.65142662833472,
+    "max": 123.65142662833472,
+    "values": [
+      123.65142662833472
+    ]
+  },
+  "Avg_PageLoadTime": {
+    "mean": 0.0019096,
+    "median": 0.0019096,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 0.0019096,
+    "max": 0.0019096,
+    "values": [
+      0.0019096
+    ]
+  },
+  "Jitter": {
+    "mean": 7.64126,
+    "median": 7.64126,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 7.64126,
+    "max": 7.64126,
+    "values": [
+      7.64126
+    ]
+  },
+  "TcpRetransmissions": {
+    "mean": 0.0,
+    "median": 0.0,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 0.0,
+    "max": 0.0,
+    "values": [
+      0.0
+    ]
+  },
+  "HolEvents": {
+    "mean": 0.0,
+    "median": 0.0,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 0.0,
+    "max": 0.0,
+    "values": [
+      0.0
+    ]
+  },
+  "HolTime": {
+    "mean": 0.0,
+    "median": 0.0,
+    "p90": null,
+    "p99": null,
+    "stdev": 0,
+    "min": 0.0,
+    "max": 0.0,
+    "values": [
+      0.0
+    ]
+  }
+}

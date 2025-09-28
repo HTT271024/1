@@ -1,0 +1,17 @@
+{
+  "protocol": "HTTP/1.1",
+  "data_rate": "1000Mbps",
+  "delay": "0ms",
+  "error_rate": "0.0",
+  "req_size": "1024",
+  "n_requests": "10",
+  "n_runs": 1,
+  "file_sizes": {
+    "10KB": "10240",
+    "50KB": "51200",
+    "150KB": "153600"
+  },
+  "http1_connections": "6",
+  "timestamp": "20250929_112146",
+  "run_seed": 93022
+}
