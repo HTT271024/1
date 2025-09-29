@@ -1,6 +1,0 @@
-latency_ms,bandwidth,loss,avg_delay_s,avg_throughput_Mbps,onload_s,retx_count,retx_rate_per_s,jitter_s,hol_events,hol_time_s,conn_hol_stall_s,conn_hol_ratio_percent,hpack_saved_bytes,hpack_compression_percent
-1,10Mbps,0.01,0.160,11.183,14.660,155,10.573,0.244,38,7.996,12.434,84.816,28000,0.1
-2,10Mbps,0.01,0.320,8.456,18.234,142,7.789,0.156,52,12.345,8.765,48.123,28000,0.1
-5,10Mbps,0.01,0.833,2.826,58.012,123,2.120,0.255,47,54.568,1.434,2.472,28000,0.1
-10,10Mbps,0.01,1.245,1.987,72.456,98,1.352,0.432,35,68.234,0.876,1.208,28000,0.1
-20,10Mbps,0.01,2.156,1.234,89.123,87,0.976,0.678,28,82.456,0.543,0.609,28000,0.1

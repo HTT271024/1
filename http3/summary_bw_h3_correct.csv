@@ -1,6 +1,0 @@
-bandwidth,latency,loss,avg_delay_s,avg_throughput_Mbps,onload_s,retx_count,retx_rate_per_s,jitter_s,hol_events,hol_time_s,qpack_saved_bytes,qpack_compression_percent
-1Mbps,5ms,0,7.1,0.041,38.79,224,5.78,0.165,4,25.00,5460,0.1
-2Mbps,5ms,0,4.0,0.070,22.60,775,34.30,0.138,3,19.88,5600,0.1
-5Mbps,5ms,0,7.0,0.117,12.72,876,68.89,0.351,3,11.53,5600,0.1
-10Mbps,5ms,0,2.8,0.289,6.21,635,102.26,0.614,3,1.86,5460,0.1
-20Mbps,5ms,0,2.2,0.368,4.07,356,87.47,0.465,3,3.40,5600,0.1 

@@ -248,16 +248,17 @@ static uint64_t g_retxCount = 0;
 // -------------------- QUIC Session --------------------
 class QuicSession : public Object {
 public:
-  QuicSession(Ptr<Socket> udp)
-  : m_udp(udp), m_nextPktNum(1), m_mtu(1200), m_largestToAck(0), m_largestAcked(0) {
+  QuicSession(Ptr<Socket> udp, bool quiet = false)
+  : m_udp(udp), m_nextPktNum(1), m_mtu(1200), m_largestToAck(0), m_largestAcked(0), m_quiet(quiet) {
     m_udp->SetRecvCallback(MakeCallback(&QuicSession::OnUdpRecv, this));
     
     // 初始化拥塞控制参数
-    m_cwnd = 40 * kQuicMssBytes;  // 提高初始拥塞窗口到40个MSS，提升启动速率
+    // ★ 关键修复：将初始CWND从60降到10 ★
+    m_cwnd = 10 * kQuicMssBytes;      // 从一个更合理的值开始慢启动
     m_ssthresh = UINT64_MAX;
     m_srtt = MilliSeconds(0);
     m_rttvar = MilliSeconds(0);
-    m_rto = MilliSeconds(200);
+    m_rto = MilliSeconds(80);        // 降低初始RTO，加速调试 (100ms -> 80ms)
     m_bytesInFlight = 0;
     m_lastLossTs = Seconds(0);
     
@@ -265,7 +266,7 @@ public:
     m_connWindowBytes = 256 * 1024 * 1024;  // 连接窗口 256MB
     
     // 初始化ACK相关
-    m_ackDelay = MilliSeconds(3);   // 降低ACK延迟，减少队头抖动
+    m_ackDelay = MilliSeconds(1);     // 最小化ACK延迟 (2ms -> 1ms)
   }
 
   // 估算打包后的UDP负载大小（不含IP/UDP头）
@@ -279,6 +280,28 @@ public:
   uint64_t BytesInFlight() const { return m_bytesInFlight; }
   uint64_t CwndBytes() const { return m_cwnd; }
   Time Srtt() const { return m_srtt; }
+  
+  // 新增：获取发送步调延迟的函数
+  Time GetPacingDelay(uint32_t packetSize) const {
+    // 如果还没有SRTT估算或CWND为0，返回一个很小的默认延迟，避免除以0
+    if (m_srtt == MilliSeconds(0) || m_cwnd == 0) {
+      return MilliSeconds(1); 
+    }
+
+    // 步调速率 (bytes/sec) = 拥塞窗口 / RTT
+    // 加一个很小的数防止除以零
+    double pacingRate = static_cast<double>(m_cwnd) / (m_srtt.GetSeconds() + 1e-9);
+    
+    // 如果速率过低，也使用一个最小延迟
+    if (pacingRate < 1.0) {
+        return MilliSeconds(1);
+    }
+    
+    // 下一个包的发送延迟 (sec) = 包大小 / 步调速率
+    double delaySeconds = static_cast<double>(packetSize) / pacingRate;
+    
+    return Seconds(delaySeconds);
+  }
 
   // 注册ACK唤醒回调
   void SetWakeupCallback(Callback<void> cb) { m_wakeupCb = cb; }
@@ -340,6 +363,9 @@ public:
     f.payload = std::string(reinterpret_cast<const char*>(buf), len);
     f.fin = fin;
 
+    // 记录发送FIN的情况
+    if (f.fin) std::cout << "[QUIC] SEND FIN sid=" << f.streamId << " pkt=" << m_nextPktNum << std::endl;
+
     SendFrames({f});
     m_streamOffsets[sid] += len;
   }
@@ -349,7 +375,7 @@ public:
   }
 
 private:
-  void SendPacket(const std::vector<QuicFrame>& frames) {
+  void SendPacket(const std::vector<QuicFrame>& frames, bool isRetransmission = false) {
     // 判断是否 ACK-only 包
     bool ackOnly = true;
     for (const auto &f : frames) { if (f.type != QF_ACK) { ackOnly = false; break; } }
@@ -361,8 +387,9 @@ private:
     std::string s = p.Serialize();
     uint32_t sz = s.size();
     
-    // 拥塞控制检查：ACK-only 绕过拥塞控制
-    if (!ackOnly) {
+    // ★ 关键修复 ★
+    // 仅对非重传、非ACK-only的包进行拥塞控制检查
+    if (!ackOnly && !isRetransmission) {
       if (!CanSend(sz)) {
         // 限频打印
         static Time lastLog = Seconds(0);
@@ -400,6 +427,7 @@ private:
       m_bytesInFlight += sz;
       // 启动RTO定时器
       ArmRto();
+      ArmPto(); // ★ 新增：启动PTO定时器 ★
     }
     
     Ptr<Packet> udpPkt = Create<Packet>(reinterpret_cast<const uint8_t*>(s.data()), s.size());
@@ -407,10 +435,10 @@ private:
     else                        m_udp->Send(udpPkt);
     
     // 添加调试信息（仅对含数据的包）
-    if (!ackOnly) {
-    for (const auto& f : frames) {
-      if (f.type == QF_STREAM) {
-        std::cout << "[QUIC] Sent packet " << p.pktNum << " with STREAM frame for stream " 
+    if (!ackOnly && !m_quiet) {
+      for (const auto& f : frames) {
+        if (f.type == QF_STREAM) {
+          std::cout << "[QUIC] Sent packet " << p.pktNum << " with STREAM frame for stream " 
                     << f.streamId << " size=" << f.payload.size() << " fin=" << f.fin 
                     << " (bytesInFlight=" << m_bytesInFlight << ")" << std::endl;
         }
@@ -428,8 +456,14 @@ private:
       if (f.type != QF_ACK) ackEliciting = true;
 
       if (f.type == QF_STREAM) {
-        std::cout << "[QUIC] Received packet " << packet.pktNum << " with STREAM frame for stream " 
+        if (!m_quiet) {
+          std::cout << "[QUIC] Received packet " << packet.pktNum << " with STREAM frame for stream " 
                   << f.streamId << " size=" << f.payload.size() << " fin=" << f.fin << std::endl;
+        }
+        // 记录收到FIN的情况
+        if (f.fin) {
+          std::cout << "[QUIC] Received FIN for stream " << f.streamId << " in packet " << packet.pktNum << std::endl;
+        }
         if (!m_onStreamData.IsNull()) {
           m_onStreamData(f.streamId,
                          reinterpret_cast<const uint8_t*>(f.payload.data()),
@@ -495,59 +529,74 @@ private:
       if (m_srtt == MilliSeconds(0)) { m_srtt = rtt; m_rttvar = rtt / 2; }
       else { Time diff = (rtt > m_srtt) ? (rtt - m_srtt) : (m_srtt - rtt); m_rttvar = (3 * m_rttvar + diff) / 4; m_srtt = (7 * m_srtt + rtt) / 8; }
       m_rto = std::max(m_srtt + 4 * m_rttvar, MilliSeconds(100));
-      std::cout << "[QUIC] RTT update: " << rtt.GetMilliSeconds() << "ms, SRTT: "
-                << m_srtt.GetMilliSeconds() << "ms, RTO: " << m_rto.GetMilliSeconds() << "ms" << std::endl;
+      if (!m_quiet) {
+        std::cout << "[QUIC] RTT update: " << rtt.GetMilliSeconds() << "ms, SRTT: "
+                  << m_srtt.GetMilliSeconds() << "ms, RTO: " << m_rto.GetMilliSeconds() << "ms" << std::endl;
+      }
     }
 
     // Track largest acked for loss heuristics
     if (largest > m_largestAcked) m_largestAcked = largest;
 
-    auto erase_if = [&](uint64_t pn){
-      auto it = m_unacked.find(pn);
-      if (it != m_unacked.end()) {
-        m_bytesInFlight = (m_bytesInFlight >= it->second.size ? m_bytesInFlight - it->second.size : 0);
-        m_unacked.erase(it);
-      }
-    };
-
-    // Ack handling
+    // --- replace ACK handling with this block ---
+    std::vector<uint64_t> acked;
     if (cumulativeAck) {
-      // 累计ACK：认为<=largest均已确认
-      std::vector<uint64_t> done;
-      done.reserve(m_unacked.size());
-      for (auto &kv : m_unacked) if (kv.first <= largest) done.push_back(kv.first);
-      for (uint64_t pn : done) { erase_if(pn); }
+      for (auto &kv : m_unacked) if (kv.first <= largest) acked.push_back(kv.first);
     } else {
-      // 位图ACK：largest + 窗口内位图
-      std::vector<uint64_t> acked;
-      acked.reserve(70);
       acked.push_back(largest);
       for (int i = 1; i <= 64; ++i) {
         if (mask & (1ULL << (i - 1))) {
           if (largest >= static_cast<uint64_t>(i)) acked.push_back(largest - i);
         }
       }
-      for (uint64_t pn : acked) { erase_if(pn); }
+    }
+
+    // 先统计被确认的字节数（在删除前）
+    uint64_t bytesAcked = 0;
+    for (uint64_t pn : acked) {
+      auto it = m_unacked.find(pn);
+      if (it != m_unacked.end()) bytesAcked += it->second.size;
+    }
+
+    // 然后再删除这些已确认包并从 bytesInFlight 扣除
+    for (uint64_t pn : acked) {
+      auto it = m_unacked.find(pn);
+      if (it != m_unacked.end()) {
+        m_bytesInFlight = (m_bytesInFlight >= it->second.size ? m_bytesInFlight - it->second.size : 0);
+        m_unacked.erase(it);
+      }
     }
 
     // Congestion control
-    if (m_cwnd < m_ssthresh) m_cwnd += 1200; else m_cwnd += (1200 * 1200) / m_cwnd;
+    // ★ 使用新逻辑更新 CWND ★
+    if (bytesAcked > 0) { // 只有在确认了新数据时才增加窗口
+        if (m_cwnd < m_ssthresh) {
+            // 慢启动阶段：CWND 增加量等于确认的数据量
+            m_cwnd += bytesAcked;
+        } else {
+            // 拥塞避免阶段：每个RTT大约增加一个MSS
+            // (kQuicMssBytes * kQuicMssBytes) / m_cwnd 是一个标准的近似算法
+            // ★ 关键修复：保证增量最少为1，防止整数除法结果为0 ★
+            uint64_t increment = (kQuicMssBytes * kQuicMssBytes) / (m_cwnd ? m_cwnd : 1);
+            m_cwnd += std::max((uint64_t)1, increment);
+        }
+    }
     // 放宽/移除上限保护，避免过早封顶（如需可设更高上限）
     // const uint64_t kCwndCap = 256 * kQuicMssBytes;
     // if (m_cwnd > kCwndCap) m_cwnd = kCwndCap;
-    std::cout << "[QUIC] ACK largest=" << largest << " - cwnd: " << m_cwnd << ", bytesInFlight: " << m_bytesInFlight << std::endl;
+    // 更详细的ACK日志，包括bytesAcked和重传计数
+    std::cout << "[QUIC] ACK largest=" << largest << " bytesAcked=" << bytesAcked
+              << " cwnd=" << m_cwnd << " inflight=" << m_bytesInFlight << " retx=" << g_retxCount << std::endl;
 
     // Loss detection by packet threshold (3) with time threshold
     {
       std::vector<uint64_t> toRetx;
       toRetx.reserve(m_unacked.size());
       Time now = Simulator::Now();
-      // 放宽门限：降低误判丢包
-      const int kPacketThresh = 16; // 6 -> 16
-      Time timeThresh = MilliSeconds(80); // 固定起步80ms
-      if (m_srtt > MilliSeconds(0)) {
-        timeThresh = std::max(MilliSeconds(80), (m_srtt * 5) / 2);
-      }
+      // 回到更接近 RFC9002 的丢包阈值
+      const int kPacketThresh = 3; // 收紧丢包探测                  // 16 -> 3
+      Time timeThresh = (m_srtt > MilliSeconds(0))
+                        ? std::max(m_srtt*2, MilliSeconds(30)) : MilliSeconds(120);
       for (const auto &kv : m_unacked) {
         uint64_t pn = kv.first;
         const OutPkt &op = kv.second;
@@ -566,14 +615,25 @@ private:
       }
       // 拥塞响应：每个RTT最多降低一次，避免连环收缩
       if (!toRetx.empty() && (m_srtt == MilliSeconds(0) || (Simulator::Now() - m_lastLossTs) >= m_srtt)) {
-        uint64_t floor = 16 * kQuicMssBytes;
-        m_ssthresh = std::max<uint64_t>((m_cwnd * 3) / 4, floor);
-        m_cwnd = m_ssthresh;
+        // ★ 关键修复 1：设置一个合理的最小窗口下限 (4个MSS)，而不是32个 ★
+        uint64_t floor = 4 * kQuicMssBytes;
+        
+        // ★ 关键修复 2：将窗口减半（标准的乘法减小），这比 *7/8 更稳健 ★
+        uint64_t newSsthresh = std::max<uint64_t>(m_cwnd / 2, floor);
+        
+        m_ssthresh = newSsthresh;
+        m_cwnd = newSsthresh; // 进入拥塞避免阶段，CWND通常被重置为ssthresh
         m_lastLossTs = Simulator::Now();
     }
     }
 
-    if (!m_unacked.empty()) ArmRto();
+    if (!m_unacked.empty()) {
+      ArmRto();
+      ArmPto(); // ★ 新增：重置PTO定时器 ★
+    } else {
+      if (m_retxTimer.IsPending()) m_retxTimer.Cancel();
+      if (m_ptoTimer.IsPending()) m_ptoTimer.Cancel(); // ★ 新增：取消PTO定时器 ★
+    }
     // ACK驱动：收到ACK后尝试唤醒发送方
     if (!m_wakeupCb.IsNull()) m_wakeupCb();
   }
@@ -615,6 +675,7 @@ private:
   };
   std::map<uint64_t, OutPkt> m_unacked;
   EventId m_retxTimer;
+  EventId m_ptoTimer; // 新增：探测超时定时器
 
   // 发送唤醒回调
   Callback<void> m_wakeupCb;
@@ -628,16 +689,20 @@ private:
   bool CanSendStreamData(uint32_t streamId, uint32_t sz) {
     // 检查连接级流控
     if (m_bytesInFlight + sz > m_connWindowBytes) {
-      std::cout << "[QUIC] Connection flow control blocked: connWin=" << m_connWindowBytes 
-                << " bytesInFlight=" << m_bytesInFlight << " need=" << sz << std::endl;
+      if (!m_quiet) {
+        std::cout << "[QUIC] Connection flow control blocked: connWin=" << m_connWindowBytes 
+                  << " bytesInFlight=" << m_bytesInFlight << " need=" << sz << std::endl;
+      }
       return false;
     }
     
     // 检查流级流控
     auto it = m_streamWindows.find(streamId);
     if (it != m_streamWindows.end() && it->second < sz) {
-      std::cout << "[QUIC] Stream flow control blocked: sid=" << streamId 
-                << " streamWin=" << it->second << " need=" << sz << std::endl;
+      if (!m_quiet) {
+        std::cout << "[QUIC] Stream flow control blocked: sid=" << streamId 
+                  << " streamWin=" << it->second << " need=" << sz << std::endl;
+      }
       return false;
     }
     
@@ -656,6 +721,13 @@ private:
   
   // 重传处理
   void Retransmit(uint64_t pktNum) {
+    // 检测重复重传
+    static std::set<uint64_t> retransmitted;
+    if (retransmitted.count(pktNum)) {
+      std::cout << "[WARN] Duplicate retransmission of packet " << pktNum << std::endl;
+      return;
+    }
+    retransmitted.insert(pktNum);
     auto it = m_unacked.find(pktNum);
     if (it == m_unacked.end()) return;
 
@@ -669,19 +741,69 @@ private:
 
     // Send as a new packet (will assign new pktNum and re-add to unacked)
     g_retxCount++; // 确保重传计数增加
-    std::cout << "[QUIC] Retransmitting packet " << pktNum << " (total retx: " << g_retxCount << ")" << std::endl;
-    SendPacket(frames);
-
-    // Exponential backoff on RTO and reduce cwnd
-    m_rto = std::min(Seconds(3), m_rto * 2);
-    if (m_cwnd > 8*1200) { m_ssthresh = std::max<uint64_t>(m_cwnd / 2, 8 * 1200); m_cwnd = 8 * 1200; }
+    if (!m_quiet) {
+      std::cout << "[QUIC] Retransmitting packet " << pktNum << " (total retx: " << g_retxCount << ")" << std::endl;
+    }
+    // MODIFIED: 调用 SendPacket 时，传入 true 表示这是重传包
+    SendPacket(frames, true);
   }
   
-  // RTO处理
   void ArmRto() {
-    if (m_retxTimer.IsPending()) return;
-    m_retxTimer = Simulator::Schedule(m_rto, &QuicSession::OnRto, this);
+    if (m_unacked.empty()) { if (m_retxTimer.IsPending()) m_retxTimer.Cancel(); return; }
+    if (!m_retxTimer.IsPending())
+      m_retxTimer = Simulator::Schedule(m_rto, &QuicSession::OnRto, this);
   }
+  
+  // 新增：启动PTO定时器
+  void ArmPto() {
+      if (m_ptoTimer.IsPending()) m_ptoTimer.Cancel();
+      // 如果有在途数据，则设置PTO
+      if (m_bytesInFlight > 0) {
+          // PTO 时间可以设置为 RTO 的一个倍数或一个固定值
+          // 减小PTO延时，加速调试
+          Time pto_delay = m_rto + MilliSeconds(20);
+          m_ptoTimer = Simulator::Schedule(pto_delay, &QuicSession::OnPto, this);
+      }
+  }
+
+  // 新增：PTO超时处理函数
+  void OnPto() {
+      if (m_bytesInFlight == 0) {
+          return; // 没有在途数据，不需要探测
+      }
+      
+      if (!m_quiet) {
+        std::cout << "[QUIC] PTO Fired! Sending a PING frame to elicit ACK." << std::endl;
+      }
+
+      // 发送一个PING帧来探测网络
+      QuicFrame ping;
+      ping.type = QF_PING;
+      ping.streamId = 0;
+      ping.offset = 0;
+      ping.payload = "";
+
+      // 注意：PING帧也需要封装在QuicPacket里
+      QuicPacket p;
+      p.pktNum = 0; // PING包可以不消耗包序号
+      p.frames.push_back(ping);
+
+      std::string s = p.Serialize();
+      Ptr<Packet> udpPkt = Create<Packet>(reinterpret_cast<const uint8_t*>(s.data()), s.size());
+      if (!(m_peer == Address())) m_udp->SendTo(udpPkt, 0, m_peer);
+      else m_udp->Send(udpPkt);
+
+      // 强制快速重传最早未确认包，避免长时间等待
+      if (!m_unacked.empty()) {
+        uint64_t oldest = m_unacked.begin()->first;
+        std::cout << "[QUIC] PTO -> force retransmit pkt " << oldest << std::endl;
+        Retransmit(oldest);
+      }
+
+      // PTO超时后，进行指数退避并重新启动定时器
+      ArmPto(); 
+  }
+  
   
   void OnRto() {
     if (m_unacked.empty()) return;
@@ -690,15 +812,17 @@ private:
     auto it = m_unacked.begin();
     Retransmit(it->first);
     
-    // 拥塞控制：RTO 更温和收缩到 3/4，且不低于 16*MSS
-    {
-      if (m_srtt == MilliSeconds(0) || (Simulator::Now() - m_lastLossTs) >= m_srtt) {
-      uint64_t newCwnd = (m_cwnd * 3) / 4;
-        uint64_t floor = 32 * kQuicMssBytes; // 更高的下限
-      m_ssthresh = std::max<uint64_t>(newCwnd, floor);
-      m_cwnd = m_ssthresh;
-        m_lastLossTs = Simulator::Now();
-      }
+    // 拥塞控制：只在"距离上次收缩 >= SRTT"时收缩一次，且别太狠
+    if (m_srtt == MilliSeconds(0) || (Simulator::Now() - m_lastLossTs) >= m_srtt) {
+      // ★ 关键修复 1：设置一个合理的最小窗口下限 (4个MSS) ★
+      uint64_t floor = 4 * kQuicMssBytes;
+      
+      // ★ 关键修复 2：将窗口减半（标准的乘法减小）★
+      uint64_t newSsthresh = std::max<uint64_t>(m_cwnd / 2, floor);
+      
+      m_ssthresh = newSsthresh;
+      m_cwnd = newSsthresh;
+      m_lastLossTs = Simulator::Now();
     }
     m_rto = std::min(Seconds(3), m_rto*2);
     
@@ -707,15 +831,17 @@ private:
   }
 
   Time m_lastLossTs;  // 上次执行拥塞收缩的时间
+  bool m_quiet{false};  // 添加安静模式标志
 };
 
 // -------------------- HTTP/3 Client --------------------
 class Http3ClientApp : public Application {
 public:
   Http3ClientApp() : m_socket(0), m_port(0) {}
-  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs, double interval, bool thirdParty, uint32_t nStreams) {
+  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs, double interval, bool thirdParty, uint32_t nStreams, bool quiet = false) {
     m_servAddr = servAddr; m_port = port; m_reqSize = reqSize; m_nReqs = nReqs;
     m_interval = interval; m_thirdParty = thirdParty; m_nStreams = nStreams;
+    m_quiet = quiet;
   }
 
   uint32_t GetRespsRcvd() const { return m_respsRcvd; }
@@ -728,11 +854,28 @@ public:
   uint32_t GetPushCompleted() const { return m_pushCompleted; }
   uint64_t GetTotalPushBytes() const { uint64_t tot=0; for (auto& kv: m_pushBytes) tot+=kv.second; return tot; }
 
+  // 在Http3ClientApp类中添加VerifyCompletedStreams方法
+  void VerifyCompletedStreams() const {
+    for (auto const& [sid, is_completed] : m_streamCompleted) {
+      if (is_completed) {
+        auto targetIt = m_streamTargetBytes.find(sid);
+        auto receivedBytes = BytesReceived(sid);
+        if (targetIt != m_streamTargetBytes.end()) {
+          uint64_t target = targetIt->second;
+          if (target != receivedBytes) {
+            std::cout << "[ERROR] Data Integrity Fail on Stream " << sid
+                      << ": Expected " << target << ", Got " << receivedBytes << std::endl;
+          }
+        }
+      }
+    }
+  }
+
 private:
   void StartApplication() override {
     m_socket = Socket::CreateSocket(GetNode(), UdpSocketFactory::GetTypeId());
     m_socket->Connect(InetSocketAddress(Ipv4Address::ConvertFrom(m_servAddr), m_port));
-    m_session = CreateObject<QuicSession>(m_socket);
+    m_session = CreateObject<QuicSession>(m_socket, m_quiet);  // 传递quiet参数
     m_session->SetStreamDataCallback(MakeCallback(&Http3ClientApp::OnStreamData, this));
 
     m_reqsSent = m_respsRcvd = 0;
@@ -743,7 +886,7 @@ private:
     m_nextStreamId = 1;  // 从 1 开始递增（模拟即可，真实 QUIC 会用奇数）
 
     // 初始化流重组相关
-    m_gaps.clear();
+    m_streamBytesReceived.clear();
     m_finalSize.clear();
 
     // 握手时延建模（模拟TLS1.3 1-RTT）
@@ -751,8 +894,10 @@ private:
     double estimatedRtt = 0.010;  // 默认10ms，实际应该从网络配置获取
     double handshakeDelay = estimatedRtt;  // 1-RTT握手
     
-    std::cout << "[QUIC] Estimated RTT: " << (estimatedRtt * 1000) << "ms, handshake delay: " 
-              << (handshakeDelay * 1000) << "ms" << std::endl;
+    if (!m_quiet) {
+      std::cout << "[QUIC] Estimated RTT: " << (estimatedRtt * 1000) << "ms, handshake delay: " 
+                << (handshakeDelay * 1000) << "ms" << std::endl;
+    }
     
     // 延迟发送第一个请求，模拟握手过程
     Simulator::Schedule(Seconds(handshakeDelay), &Http3ClientApp::SendNextRequest, this);
@@ -760,40 +905,11 @@ private:
 
   void StopApplication() override { if (m_socket) m_socket->Close(); }
 
+  // 原来的 SendNextRequest 改名为 StartRequests，在开始时调用
   void SendNextRequest() {
-    if (m_reqsSent >= m_nReqs) return;
     uint32_t reqsToSend = std::min(m_nReqs - m_reqsSent, m_nStreams);
-
     for (uint32_t i = 0; i < reqsToSend; ++i) {
-      uint32_t streamId = m_nextStreamId++;     // ★ 每个请求一个全新 streamId
-      m_session->OpenStream(streamId);
-
-      HTTP3Frame h;
-      h.streamId = streamId;
-      h.type = HEADERS;
-      std::ostringstream oss;
-      if (m_thirdParty) {
-        const char* domains[] = {"firstparty.example","cdn.example","ads.example"};
-        const char* host = domains[m_reqsSent % 3];
-        oss << "GET /file" << m_reqsSent << " HTTP/3.0\r\nHost: " << host << "\r\n\r\n";
-      } else {
-        oss << "GET /file" << m_reqsSent << " HTTP/3.0\r\nHost: server\r\n\r\n";
-      }
-      h.payload = oss.str();
-      h.length  = h.payload.size();
-      uint32_t desired = std::max(m_reqSize, (uint32_t)h.payload.size());
-      if (desired > h.payload.size()) { h.payload.append(desired - h.payload.size(), ' '); h.length = desired; }
-
-      std::string hs = h.Serialize();
-      m_session->SendStreamData(streamId, reinterpret_cast<const uint8_t*>(hs.data()), hs.size(), false);
-
-      HTTP3Frame end;
-      end.streamId = streamId; end.type = DATA; end.length = 0; end.payload = "";
-      std::string es = end.Serialize();
-      m_session->SendStreamData(streamId, reinterpret_cast<const uint8_t*>(es.data()), es.size(), true);
-
-      m_reqSendTimes.push_back(Simulator::Now().GetSeconds());
-      ++m_reqsSent;
+      SendSingleRequest();
     }
   }
 
@@ -801,7 +917,9 @@ private:
     // ① 先把数据追加到该流的专属缓冲
     std::string& buf = m_rxBuf[streamId];
     buf.append(reinterpret_cast<const char*>(data), len);
-    std::cout << "[DEBUG] Stream " << streamId << " buffer size: " << buf.size() << " after adding " << len << " bytes" << std::endl;
+    if (!m_quiet) { // 已有
+      std::cout << "[DEBUG] Stream " << streamId << " buffer size: " << buf.size() << " after adding " << len << " bytes" << std::endl;
+    }
 
     // ② 在该流的缓冲里，用 LEN: 精确切帧
     size_t pos = 0;
@@ -832,11 +950,15 @@ private:
 
       // 提取这一完整帧并处理
       std::string frameData = buf.substr(frameStart, payloadStart - frameStart + frameLen);
-      std::cout << "[DEBUG] Parsing frame: start=" << frameStart 
-                << " payloadStart=" << payloadStart 
-                << " frameLen=" << frameLen 
-                << " actualSize=" << frameData.size() 
-                << " for stream " << streamId << std::endl;
+      
+      // MODIFIED: Wrap the log
+      if (!m_quiet) {
+        std::cout << "[DEBUG] Parsing frame: start=" << frameStart 
+                  << " payloadStart=" << payloadStart 
+                  << " frameLen=" << frameLen 
+                  << " actualSize=" << frameData.size() 
+                  << " for stream " << streamId << std::endl;
+      }
       ProcessFrame(streamId, frameData);
 
       pos = frameStart + frameData.size();
@@ -844,19 +966,28 @@ private:
 
     // ③ 丢掉已消费的前缀，留下不完整的尾巴
     if (pos > 0) {
-      std::cout << "[DEBUG] Stream " << streamId << " removing " << pos << " bytes, remaining: " << (buf.size() - pos) << std::endl;
+      // MODIFIED: Wrap the log
+      if (!m_quiet) {
+        std::cout << "[DEBUG] Stream " << streamId << " removing " << pos << " bytes, remaining: " << (buf.size() - pos) << std::endl;
+      }
       buf.erase(0, pos);
     }
 
     // ④ 收到该流的 QUIC FIN，表示流结束，需要检查完成状态
     if (fin) {
-      if (m_streamTargetBytes.count(streamId) &&
-          m_streamBytes[streamId] < m_streamTargetBytes[streamId]) {
-        std::cout << "[WARN] FIN before target on stream " << streamId
-                  << " got=" << m_streamBytes[streamId]
-                  << " need=" << m_streamTargetBytes[streamId] << "\n";
+      if (m_streamTargetBytes.count(streamId)) {
+        uint64_t have = BytesReceived(streamId);
+        uint64_t need = m_streamTargetBytes[streamId];
+        if (have < need) {
+          std::cout << "[WARN] FIN before target on stream " << streamId
+                    << " got=" << have
+                    << " need=" << need << "\n";
+        }
       }
-      std::cout << "[DEBUG] Received FIN for stream " << streamId << std::endl;
+      // MODIFIED: Wrap the log
+      if (!m_quiet) {
+        std::cout << "[DEBUG] Received FIN for stream " << streamId << std::endl;
+      }
       CheckStreamCompletion(streamId);
     }
   }
@@ -877,7 +1008,10 @@ private:
       bool isPush = (sid >= 1000) || (f.payload.find("x-push: 1") != std::string::npos);
 
       if (f.type == HEADERS) {
-        std::cout << "[DEBUG] Received HEADERS for stream " << sid << std::endl;
+        // MODIFIED: Wrap the log
+        if (!m_quiet) {
+          std::cout << "[DEBUG] Received HEADERS for stream " << sid << std::endl;
+        }
         size_t p = f.payload.find("Content-Length: ");
         if (p != std::string::npos) {
           size_t e = f.payload.find("\r\n", p);
@@ -886,8 +1020,14 @@ private:
             m_pushTargetBytes[sid] = len; m_pushBytes[sid] = 0; ++m_pushStreams;
           } else {
             m_streamTargetBytes[sid] = len; m_streamBytes[sid] = 0;
-            std::cout << "[DEBUG] Set target for stream " << sid << ": " << len << " bytes" << std::endl;
+            // MODIFIED: Wrap the log
+            if (!m_quiet) {
+              std::cout << "[DEBUG] Set target for stream " << sid << ": " << len << " bytes" << std::endl;
+            }
           }
+        } else {
+          // 健壮性检查：若没解析到Content-Length，立刻报警
+          std::cout << "[ERROR] No Content-Length in HEADERS (sid=" << sid << "), payload: " << f.payload << std::endl;
         }
         return;
       }
@@ -912,20 +1052,34 @@ private:
           return;
         }
 
+        // 健壮性检查：若没收到HEADERS就收到DATA，给出警告
+        if (!m_streamTargetBytes.count(sid)) {
+          std::cout << "[WARN] DATA before Content-Length (sid=" << sid << "), dataLen=" << dataLen << std::endl;
+        }
+
         // 使用offset进行流重组
         MarkReceived(sid, dataOffset, dataLen);
+        
+        // 按缺口"催一下"重传
+        if (!HasFullPrefix(sid, m_streamTargetBytes[sid])) {
+          QuicFrame ack; ack.type = QF_ACK; ack.offset = 0; ack.payload = ""; // 累计ACK
+          m_session->SendFrames({ack});
+        }
         
         // 检查是否完成
         uint64_t have = BytesReceived(sid);
         uint64_t need = m_streamTargetBytes[sid];
         
-        if (need > 0 && have >= need) {
+        if (need > 0 && HasFullPrefix(sid, need)) {
           Complete(sid);
         } else {
-          // 调试信息：显示流进度
-          std::cout << "[DEBUG] Stream " << sid << " received DATA: offset=" << dataOffset 
-                    << " len=" << dataLen << " total: " << have << "/" << need 
-                    << " bytes" << std::endl;
+          // MODIFIED: Wrap the log
+          if (!m_quiet) {
+            // 调试信息：显示流进度
+            std::cout << "[DEBUG] Stream " << sid << " received DATA: offset=" << dataOffset 
+                      << " len=" << dataLen << " total: " << have << "/" << need 
+                      << " bytes" << std::endl;
+          }
         }
       }
     } catch (const std::exception& e) {
@@ -937,18 +1091,59 @@ private:
     if (!m_streamTargetBytes.count(streamId)) return;
     uint64_t need = m_streamTargetBytes[streamId];
     uint64_t have = BytesReceived(streamId);
-    if (need > 0 && have >= need && !m_streamCompleted[streamId]) {
+    if (need > 0 && HasFullPrefix(streamId, need) && !m_streamCompleted[streamId]) {
       m_streamCompleted[streamId] = true;
       ++m_respsRcvd;
       m_respRecvTimes.push_back(Simulator::Now().GetSeconds());
-      std::cout << "[DEBUG] Stream " << streamId << " completed! Total: " << m_respsRcvd << "/" << m_nReqs << std::endl;
-      if (m_respsRcvd < m_nReqs && m_reqsSent < m_nReqs)
-        Simulator::Schedule(Seconds(m_interval), &Http3ClientApp::SendNextRequest, this);
-    } else {
-        std::cout << "[DEBUG] Stream " << streamId << " progress: " 
-                << have << "/" << need 
-                  << " bytes" << std::endl;
+      if (!m_quiet) {
+        std::cout << "[DEBUG] Stream " << streamId << " completed! Total: " << m_respsRcvd << "/" << m_nReqs << std::endl;
+      }
+      
+      // ★ 关键修复 ★
+      // 如果还有请求需要发送，立即发送下一个，而不是等待
+      if (m_respsRcvd < m_nReqs && m_reqsSent < m_nReqs) {
+        SendSingleRequest();
+      }
+    } else if (!m_quiet) {
+      std::cout << "[DEBUG] Stream " << streamId << " progress: " 
+              << have << "/" << need 
+                << " bytes" << std::endl;
     }
+  }
+  
+  // ★ 新增一个辅助函数 ★
+  void SendSingleRequest() {
+    if (m_reqsSent >= m_nReqs) return;
+
+    uint32_t streamId = m_nextStreamId++;
+    m_session->OpenStream(streamId);
+
+    HTTP3Frame h;
+    h.streamId = streamId;
+    h.type = HEADERS;
+    std::ostringstream oss;
+    if (m_thirdParty) {
+      const char* domains[] = {"firstparty.example","cdn.example","ads.example"};
+      const char* host = domains[m_reqsSent % 3];
+      oss << "GET /file" << m_reqsSent << " HTTP/3.0\r\nHost: " << host << "\r\n\r\n";
+    } else {
+      oss << "GET /file" << m_reqsSent << " HTTP/3.0\r\nHost: server\r\n\r\n";
+    }
+    h.payload = oss.str();
+    h.length  = h.payload.size();
+    uint32_t desired = std::max(m_reqSize, (uint32_t)h.payload.size());
+    if (desired > h.payload.size()) { h.payload.append(desired - h.payload.size(), ' '); h.length = desired; }
+
+    std::string hs = h.Serialize();
+    m_session->SendStreamData(streamId, reinterpret_cast<const uint8_t*>(hs.data()), hs.size(), false);
+
+    HTTP3Frame end;
+    end.streamId = streamId; end.type = DATA; end.length = 0; end.payload = "";
+    std::string es = end.Serialize();
+    m_session->SendStreamData(streamId, reinterpret_cast<const uint8_t*>(es.data()), es.size(), true);
+
+    m_reqSendTimes.push_back(Simulator::Now().GetSeconds());
+    ++m_reqsSent;
   }
 
   Ptr<Socket> m_socket;
@@ -968,70 +1163,70 @@ private:
   std::map<uint32_t,uint32_t> m_streamDataFrames;  // 新增：跟踪每个流接收到的DATA帧数量
   uint32_t m_nextStreamId{1};   // 每个请求使用唯一的流 ID（单调递增）
 
-  // 流重组相关成员
-  struct Frag { 
-    uint64_t off; 
-    uint32_t len; 
-    Frag(uint64_t o, uint32_t l) : off(o), len(l) {}
-  };
-  std::map<uint32_t, std::map<uint64_t, uint32_t>> m_gaps;  // 待收区间: streamId -> {offset -> length}
+  // 流重组相关成员 - 简化版本
+  std::map<uint32_t, uint64_t> m_streamBytesReceived;  // 每个流已接收的字节数
   std::map<uint32_t, uint64_t> m_finalSize;  // 来自FIN或HEADERS的Content-Length
 
   std::map<uint32_t,uint32_t> m_pushBytes, m_pushTargetBytes;
   uint32_t m_pushCompleted{0}, m_pushStreams{0};
   
-  // 流重组核心方法
-  void MarkReceived(uint32_t streamId, uint64_t offset, uint32_t length) {
-    auto& gaps = m_gaps[streamId];
-    
-    // 查找是否有重叠的区间
-    auto it = gaps.lower_bound(offset);
-    
-    // 检查前一个区间是否重叠
-    if (it != gaps.begin()) {
-      auto prev = std::prev(it);
-      if (prev->first + prev->second >= offset) {
-        // 与前一个区间重叠，合并
-        uint64_t newStart = prev->first;
-        uint64_t newEnd = std::max(prev->first + prev->second, offset + length);
-        prev->second = newEnd - newStart;
-        
-        // 检查是否与当前区间重叠
-        if (it != gaps.end() && newEnd >= it->first) {
-          // 与当前区间也重叠，继续合并
-          newEnd = std::max(newEnd, it->first + it->second);
-          prev->second = newEnd - newStart;
-          gaps.erase(it);
-        }
-        return;
-      }
-    }
-    
-    // 检查与当前区间的重叠
-    while (it != gaps.end() && offset + length >= it->first) {
-      if (offset <= it->first + it->second) {
-        // 重叠，合并
-        uint64_t newStart = std::min(offset, it->first);
-        uint64_t newEnd = std::max(offset + length, it->first + it->second);
-        offset = newStart;
-        length = newEnd - newStart;
-        it = gaps.erase(it);
+  // 区间重组结构
+  struct Range { uint64_t lo; uint64_t hi; };
+  std::map<uint32_t, std::vector<Range>> m_ranges;   // sid -> ranges
+
+  void AddRange(uint32_t sid, uint64_t off, uint32_t len) {
+    if (!len) return;
+    uint64_t lo = off, hi = off + len;
+    auto &v = m_ranges[sid];
+    std::vector<Range> out; out.reserve(v.size() + 1);
+    bool inserted = false;
+    for (auto &r : v) {
+      if (hi < r.lo) {
+        if (!inserted) { out.push_back({lo, hi}); inserted = true; }
+        out.push_back(r);
+      } else if (r.hi < lo) {
+        out.push_back(r);
       } else {
-        break;
+        lo = std::min(lo, r.lo);
+        hi = std::max(hi, r.hi);
       }
     }
-    
-    // 插入新区间
-    gaps[offset] = length;
+    if (!inserted) out.push_back({lo, hi});
+    v.swap(out);
+  }
+
+  bool HasFullPrefix(uint32_t sid, uint64_t need) const {
+    auto it = m_ranges.find(sid);
+    if (it == m_ranges.end()) return need == 0;
+    const auto& v = it->second;
+    if (need == 0) return true;
+    if (v.empty() || v.front().lo != 0) return false;
+    uint64_t reach = 0;
+    for (auto &r : v) {
+      if (r.lo > reach) return false;
+      reach = std::max(reach, r.hi);
+      if (reach >= need) return true;
+    }
+    return false;
+  }
+
+  // 流重组核心方法：基于offset的区间合并
+  void MarkReceived(uint32_t streamId, uint64_t offset, uint32_t length) {
+    AddRange(streamId, offset, length);
+    if (!m_quiet) {
+      std::cout << "[DEBUG] MarkReceived: stream=" << streamId
+                << " offset=" << offset << " len=" << length
+                << " total=" << BytesReceived(streamId) << " bytes" << std::endl;
+    }
   }
   
-  uint64_t BytesReceived(uint32_t streamId) {
-    auto& gaps = m_gaps[streamId];
-    uint64_t total = 0;
-    for (const auto& gap : gaps) {
-      total += gap.second;
+  uint64_t BytesReceived(uint32_t streamId) const {
+    uint64_t sum = 0;
+    auto it = m_ranges.find(streamId);
+    if (it != m_ranges.end()) {
+      for (auto &r : it->second) sum += (r.hi - r.lo);
     }
-    return total;
+    return sum;
   }
   
   void Complete(uint32_t streamId) {
@@ -1041,13 +1236,20 @@ private:
     ++m_respsRcvd;
     m_respRecvTimes.push_back(Simulator::Now().GetSeconds());
     
-    std::cout << "[DEBUG] Stream " << streamId << " completed via offset reassembly! Total: " 
-              << m_respsRcvd << "/" << m_nReqs << std::endl;
+    uint64_t totalSize = m_streamTargetBytes[streamId];
+    std::cout << "STREAM_COMPLETED_LOG," << Simulator::Now().GetSeconds()
+              << "," << streamId << "," << totalSize << std::endl;
+    
+    if (!m_quiet) {
+      std::cout << "[DEBUG] Stream " << streamId << " completed via offset reassembly! Total: " 
+                << m_respsRcvd << "/" << m_nReqs << std::endl;
+    }
     
     if (m_respsRcvd < m_nReqs && m_reqsSent < m_nReqs) {
       Simulator::Schedule(Seconds(m_interval), &Http3ClientApp::SendNextRequest, this);
     }
   }
+  bool m_quiet{false};
 };
 
 // -------------------- HTTP/3 Server --------------------
@@ -1056,22 +1258,40 @@ public:
   Http3ServerApp() : m_socket(0), m_port(0) {}
   void Setup(uint16_t port, uint32_t respSize, uint32_t maxReqs, uint32_t nStreams,
              uint32_t frameChunk, uint32_t tickUs, uint32_t headerSize, double hpackRatio,
-             bool enablePush, uint32_t pushSize) {
+             bool enablePush, uint32_t pushSize, bool quiet = false) {
     m_port = port; m_respSize = respSize; m_maxReqs = maxReqs; m_nStreams = nStreams;
     m_frameChunk = frameChunk; m_tickUs = tickUs; m_headerSize = headerSize;
     m_hpackRatio = hpackRatio; m_enablePush = enablePush; m_pushSize = pushSize;
+    m_quiet = quiet;
+  }
+
+  uint64_t GetHolEvents() const { return m_srvHolEvents; }
+  double GetHolBlockedTime() const { return m_srvHolBlockedTime; }
+
+  // 在Http3ServerApp类中添加LogCongestionState方法
+  void LogCongestionState() {
+    if (m_session) {
+      std::cout << "CWND_LOG," << Simulator::Now().GetSeconds() << ","
+                << m_session->CwndBytes() << "," << m_session->BytesInFlight() << std::endl;
+    }
+    Simulator::Schedule(MilliSeconds(10), &Http3ServerApp::LogCongestionState, this);
   }
 
 private:
   void StartApplication() override {
     m_socket = Socket::CreateSocket(GetNode(), UdpSocketFactory::GetTypeId());
     m_socket->Bind(InetSocketAddress(Ipv4Address::GetAny(), m_port));
-    m_session = CreateObject<QuicSession>(m_socket);
+    m_session = CreateObject<QuicSession>(m_socket, m_quiet);  // 传递quiet参数
     m_session->SetStreamDataCallback(MakeCallback(&Http3ServerApp::OnStreamData, this));
     // 绑定ACK唤醒回调：收到ACK后立即尝试继续发送
     m_session->SetWakeupCallback(MakeCallback(&Http3ServerApp::OnCanSend, this));
     m_reqsHandled = 0; m_pendingQueue.clear(); m_sending = false; m_nextPushSid = 1001; m_reqBuf.clear();
     m_streamOffsets.clear();  // 初始化流偏移
+    // 服务器侧HoL统计
+    m_srvHolBlockedTime = 0.0; m_srvHolEvents = 0; m_blocking = false; m_blockStart = Seconds(0);
+    
+    // 添加拥塞控制日志
+    Simulator::Schedule(MilliSeconds(10), &Http3ServerApp::LogCongestionState, this);
   }
 
   void OnCanSend() {
@@ -1130,22 +1350,23 @@ private:
         if (m_reqsHandled >= m_maxReqs) return;
         ++m_reqsHandled;
 
-
         uint32_t rsz = m_respSize;
         if (!g_respSizes.empty()) {
           uint32_t idx = std::min<uint32_t>(m_reqsHandled - 1, g_respSizes.size() - 1);
           rsz = g_respSizes[idx];
         }
 
-        // QPACK (模拟) 压缩后头部大小
-        uint32_t actualHeader = std::max(20u, (uint32_t)(m_headerSize * m_hpackRatio));
-
+        // QPACK (模拟) 压缩后头部大小 - 修复：绝不截断头部
         std::ostringstream oss;
         oss << "HTTP/3.0 200 OK\r\nContent-Length: " << rsz << "\r\n\r\n";
         std::string baseHeaders = oss.str();
-        std::string hdr = (actualHeader <= baseHeaders.size())
-                          ? baseHeaders.substr(0, actualHeader)
-                          : baseHeaders + std::string(actualHeader - baseHeaders.size(), ' ');
+        
+        uint32_t want = std::max<uint32_t>(baseHeaders.size(), (uint32_t)(m_headerSize * m_hpackRatio));
+        // 仅在不足时用空格填充，绝不截断
+        std::string hdr = baseHeaders;
+        if (want > baseHeaders.size()) {
+          hdr.append(want - baseHeaders.size(), ' ');
+        }
 
         // 发响应 HEADERS（序列化为 HTTP3Frame）
         HTTP3Frame hf;
@@ -1181,104 +1402,85 @@ private:
           m_pendingQueue.emplace_back(psid, m_pushSize);
         }
 
-        if (!m_sending) { m_sending = true; Simulator::Schedule(MicroSeconds(m_tickUs), &Http3ServerApp::SendTick, this); }
+        // ★ 关键修改 ★
+        // 如果当前没有在发送，则立即启动发送循环
+        if (!m_sending) { 
+          m_sending = true; 
+          Simulator::ScheduleNow(&Http3ServerApp::SendTick, this); 
+        }
       }
     } catch (const std::exception& e) {
       NS_LOG_WARN("Failed to parse frame: " << e.what());
     }
   }
 
-void SendTick() {
-  if (m_pendingQueue.empty()) {
-    m_sending = false;
-    std::cout << "[DEBUG] All streams completed, queue empty at "
-              << Simulator::Now().GetSeconds() << "s\n";
-    return;
-  }
-
-  PendingItem item = m_pendingQueue.front();
-  m_pendingQueue.pop_front();
-
-  // 提高突发上限，增强流水线能力
-  const uint32_t kBurstChunks = 12; // 2 -> 12
-  uint32_t chunks = 0;
-
-  while (item.remainingBytes > 0) {
-      // 拥塞窗门槛：预估一包大小，不足则退避，不忙等
-      const uint32_t estPkt = 1100; // 估算：头+FLEN+DATA(<=frameChunk)
-      if (m_session->BytesInFlight() + estPkt > m_session->CwndBytes()) {
-        m_pendingQueue.push_front(item);
-        m_sending = true;
-        Time backoff = std::max(MilliSeconds(1), m_session->Srtt() / 4);
-        Simulator::Schedule(backoff, &Http3ServerApp::SendTick, this);
+  void SendTick() {
+    // 如果队列已空，停止发送循环
+    if (m_pendingQueue.empty()) {
+        m_sending = false;
         return;
-      }
-      
-    if (item.remainingBytes > m_frameChunk && chunks >= kBurstChunks) break;
-
-    // 计算这一次要发的字节
-    uint32_t sendBytes = std::min(m_frameChunk, item.remainingBytes);
-
-    // 构造DATA帧
-    HTTP3Frame df;
-    df.streamId = item.streamId;
-    df.type = DATA;
-    df.payload.assign(sendBytes, 'D');
-    df.length = sendBytes;
-      
-      // 设置正确的offset
-      if (m_streamOffsets.find(item.streamId) == m_streamOffsets.end()) {
-        m_streamOffsets[item.streamId] = 0;
-      }
-      df.offset = m_streamOffsets[item.streamId];
-      m_streamOffsets[item.streamId] += sendBytes;
-
-    // 判断是否最后一口
-    bool isLast = (item.remainingBytes <= m_frameChunk);
-
-    if (isLast) {
-      // ★ 直接在最后一块DATA帧上设置fin=true，确保同包发送
-    std::string s = df.Serialize();
-    m_session->SendStreamData(item.streamId,
-                              reinterpret_cast<const uint8_t*>(s.data()),
-                                s.size(), true);  // ★ fin=true
-      std::cout << "[DEBUG] FIN sent for stream " << item.streamId 
-                << " (with last DATA)" << std::endl;
-    } else {
-      // 还没到最后一口，就正常发 DATA（无 FIN）
-      std::string s = df.Serialize();
-      m_session->SendStreamData(item.streamId,
-                                reinterpret_cast<const uint8_t*>(s.data()),
-                                s.size(), false);
     }
 
-    // 更新剩余
-    item.remainingBytes -= sendBytes;
-    item.sentBytes      += sendBytes;
-    ++chunks;
+    // ★ 关键修复 1: 在每次Tick的开始就检查拥塞窗口 ★
+    // 如果窗口已满，则停止发送，等待网络事件(ACK)通过 OnCanSend() 唤醒
+    if (m_session->BytesInFlight() >= m_session->CwndBytes()) {
+        m_sending = false; // 等待被唤醒
+        return;
+    }
 
-    std::cout << "[DEBUG] stream " << item.streamId
-              << " sent " << sendBytes << "B, left=" << item.remainingBytes
-              << " (chunks=" << chunks << ")\n";
+    // ★ 关键修复 2: 实现真正的轮询调度（一次只处理一个任务）★
 
-    if (item.remainingBytes == 0) {
-      // ★ 强校验：只要不是精确命中 totalBytes，就不许 FIN
-      if (item.sentBytes != item.totalBytes) {
-        std::cout << "[ERROR] Stream " << item.streamId
-                  << " sent=" << item.sentBytes
-                  << " total=" << item.totalBytes
-                  << " -> refuse FIN (logic bug)\n";
-        // 回队，下一轮继续补（按理说不会到这里）
+    // 1. 从队列头部取出一个任务
+    PendingItem item = m_pendingQueue.front();
+    m_pendingQueue.pop_front();
+
+    // 2. 为这个任务发送一小块数据（一个数据包的量）
+    const uint32_t effMtu = 1200 - 28; // 估算MTU
+    const uint32_t safety = 64;       // 预留头部开销
+    uint32_t sendBytes = std::min({m_frameChunk, item.remainingBytes, effMtu - safety});
+    
+    if (sendBytes > 0) {
+        HTTP3Frame df;
+        df.streamId = item.streamId;
+        df.type = DATA;
+        df.payload.assign(sendBytes, 'D');
+        df.length = sendBytes;
+        
+        // 确保流偏移被正确初始化和使用
+        if (m_streamOffsets.find(item.streamId) == m_streamOffsets.end()) {
+            m_streamOffsets[item.streamId] = 0;
+        }
+        df.offset = m_streamOffsets[item.streamId];
+
+        bool isLast = (item.remainingBytes <= sendBytes);
+        std::string s = df.Serialize();
+        m_session->SendStreamData(item.streamId, reinterpret_cast<const uint8_t*>(s.data()), s.size(), isLast);
+
+        m_streamOffsets[item.streamId] += sendBytes;
+        item.remainingBytes -= sendBytes;
+        item.sentBytes += sendBytes;
+        
+        // 若之前处于阻塞，首包发出时结束一次HoL计时
+        if (m_blocking) { 
+            m_srvHolBlockedTime += (Simulator::Now() - m_blockStart).GetSeconds(); 
+            m_blocking = false; 
+        }
+    }
+
+    // 3. 如果这个任务还没完成，就把它放回队列的尾部
+    if (item.remainingBytes > 0) {
         m_pendingQueue.push_back(item);
-      }
-      break;
+    }
+
+    // ★ 关键修复 3: 只要队列中还有任务，就立即调度下一次Tick ★
+    // 这会创建一个连续、平滑的发送流，而不是之前的"爆发-等待"模式。
+    if (!m_pendingQueue.empty()) {
+        m_sending = true;
+        Simulator::ScheduleNow(&Http3ServerApp::SendTick, this);
+    } else {
+        m_sending = false; // 所有任务都完成了
     }
   }
-
-  if (item.remainingBytes > 0) m_pendingQueue.push_back(item);
-
-  Simulator::Schedule(MicroSeconds(m_tickUs), &Http3ServerApp::SendTick, this);
-}
 
   Ptr<Socket> m_socket;
   uint16_t m_port;
@@ -1298,15 +1500,21 @@ void SendTick() {
   
   // 流偏移跟踪
   std::map<uint32_t, uint64_t> m_streamOffsets;  // 每个流的当前偏移
+  // 服务器侧HoL统计
+  double m_srvHolBlockedTime{0.0};
+  uint64_t m_srvHolEvents{0};
+  bool m_blocking{false};
+  Time m_blockStart;
+  bool m_quiet{false};
 };
 
 // -------------------- main --------------------
 int main(int argc, char* argv[]) {
-  uint32_t nRequests = 200;
-  uint32_t respSize  = 100*1024;
+  uint32_t nRequests = 16;            // 减少请求数，便于调试
+  uint32_t respSize  = 150*1024;      // 增大响应大小，重现大对象问题
   uint32_t reqSize   = 100;
   uint16_t httpPort  = 8080;
-  double   errorRate = 0.01;
+  double   errorRate = 0.01;          // 设置丢包率，重现丢包问题
   std::string dataRate = "10Mbps";
   std::string delay    = "5ms";
   double interval = 0.01;
@@ -1314,7 +1522,7 @@ int main(int argc, char* argv[]) {
   bool mixedSizes = false;
   bool thirdParty = false;
   uint32_t nStreams = 3;
-  uint32_t frameChunk = 1200;
+  uint32_t frameChunk = std::min(1200u - 28u - 32u, 1200u); // 限制不跨UDP包
   uint32_t tickUs     = 500;
   uint32_t headerSize = 200;
   double   hpackRatio = 0.3;   // simulate QPACK ratio
@@ -1322,6 +1530,7 @@ int main(int argc, char* argv[]) {
   uint32_t pushSize = 12*1024;
   double pushHitRate = 1.0;
   double simTime = 120.0;  // 默认更长仿真时间
+  bool quiet = false;  // 添加安静模式标志
 
   CommandLine cmd;
   cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
@@ -1345,6 +1554,7 @@ int main(int argc, char* argv[]) {
   cmd.AddValue("pushSize", "Push object size (bytes)", pushSize);
   cmd.AddValue("pushHitRate", "Push hit probability", pushHitRate);
   cmd.AddValue("simTime", "Simulation time in seconds", simTime);
+  cmd.AddValue("quiet", "Disable verbose per-packet/frame logs for performance", quiet);  // 添加quiet参数
   cmd.Parse(argc, argv);
 
   g_respSizes.clear(); g_respSizes.reserve(nRequests);
@@ -1372,7 +1582,7 @@ int main(int argc, char* argv[]) {
 
   Ptr<Http3ServerApp> server = CreateObject<Http3ServerApp>();
   server->Setup(httpPort, respSize, nRequests, nStreams, frameChunk, tickUs,
-                headerSize, hpackRatio, enablePush, pushSize);
+                headerSize, hpackRatio, enablePush, pushSize, quiet);
   nodes.Get(1)->AddApplication(server);
   server->SetStartTime(Seconds(0.5));
   server->SetStopTime(Seconds(simTime));
@@ -1383,7 +1593,7 @@ int main(int argc, char* argv[]) {
   for (uint32_t i=0;i<nConnections;++i) {
     uint32_t reqs = baseReqs + (i < rem ? 1 : 0);
     Ptr<Http3ClientApp> c = CreateObject<Http3ClientApp>();
-    c->Setup(ifs.GetAddress(1), httpPort, reqSize, reqs, interval, thirdParty, nStreams);
+    c->Setup(ifs.GetAddress(1), httpPort, reqSize, reqs, interval, thirdParty, nStreams, quiet);  // 传递quiet参数
     nodes.Get(0)->AddApplication(c);
     c->SetStartTime(Seconds(1.0 + i*0.01));
     c->SetStopTime(Seconds(simTime));
@@ -1434,13 +1644,17 @@ int main(int argc, char* argv[]) {
 
   // 计算正确的jitter
   if (nDone > 1) {
+    // 先排序，避免多客户端插入次序导致0
+    std::vector<double> sortedRecvTimes = recvTimes;
+    std::sort(sortedRecvTimes.begin(), sortedRecvTimes.end());
+    
     std::vector<double> interarrivalTimes;
-    for (size_t i = 1; i < recvTimes.size() && i < nDone; ++i) {
-      double interarrival = recvTimes[i] - recvTimes[i-1];
-      if (interarrival > 0 && interarrival < 5.0) { // 过滤异常值
-        interarrivalTimes.push_back(interarrival);
+          for (size_t i = 1; i < sortedRecvTimes.size() && i < nDone; ++i) {
+        double interarrival = sortedRecvTimes[i] - sortedRecvTimes[i-1];
+        if (interarrival > 0 && interarrival < 20.0) { // 过滤异常值，阈值放宽到20s
+          interarrivalTimes.push_back(interarrival);
+        }
       }
-    }
     
     if (interarrivalTimes.size() > 1) {
       // 计算interarrival variation的标准差作为jitter
@@ -1454,25 +1668,8 @@ int main(int argc, char* argv[]) {
   }
 
   // 修复HoL Events计算：只统计真正的队列阻塞事件
-  uint64_t holEvents = 0;
-  double holBlockedTime = 0.0;
-  for (auto& c : clients) {
-    const auto& s = c->GetReqSendTimes();
-    double iv = c->GetInterval();
-    
-    // 只统计由于拥塞控制或流控导致的阻塞，而不是简单的发送间隔
-    for (size_t i = 1; i < s.size(); ++i) {
-      double expectedTime = s[i-1] + iv;
-      double actualTime = s[i];
-      double extraDelay = actualTime - expectedTime;
-      
-      // 只有当延迟超过一定阈值时才认为是HoL阻塞
-      if (extraDelay > 0.1) { // 100ms阈值
-        ++holEvents;
-        holBlockedTime += extraDelay;
-      }
-    }
-  }
+  uint64_t holEvents = server->GetHolEvents();
+  double holBlockedTime = server->GetHolBlockedTime();
 
   // 始终打印最小概要，便于外部工具抓取（无论是否计算出完整统计）
   double completionRate = (nDone > 0) ? (double(nDone) / double(nRequests)) * 100.0 : 0.0;
@@ -1509,8 +1706,11 @@ int main(int argc, char* argv[]) {
     size_t n = std::min(sendTimes.size(), recvTimes.size());
     for (size_t i = 0; i < n; ++i) {
       if (recvTimes[i] > sendTimes[i]) {
-        bytesDown += bytesPer;
-        timeSum += (recvTimes[i] - sendTimes[i]);
+        double dt = recvTimes[i] - sendTimes[i];
+        if (dt > 0 && dt < simTime) {   // 过滤异常
+          bytesDown += bytesPer;
+          timeSum += dt;
+        }
       }
     }
     
@@ -1520,7 +1720,9 @@ int main(int argc, char* argv[]) {
               << " bytesDown=" << bytesDown
               << " timeSum=" << timeSum << "s" << std::endl;
     
-    double throughputDown = (timeSum > 0) ? (bytesDown * 8.0) / (timeSum * 1e6) : 0.0;
+    // 修复吞吐量计算：使用实际传输时间窗口，而不是所有请求时间总和
+    double actualTransmissionTime = lastRecv - firstSend;
+    double throughputDown = (actualTransmissionTime > 0) ? (bytesDown * 8.0) / (actualTransmissionTime * 1e6) : 0.0;
 
     double totalBytesUp = double(nDone) * headerCompressed;
     double totalBytesBi = totalBytesDown + totalBytesUp;
@@ -1531,15 +1733,18 @@ int main(int argc, char* argv[]) {
     double timeSumBi = 0.0;
     for (size_t i = 0; i < n; ++i) {
       if (recvTimes[i] > sendTimes[i]) {
-        bytesBi += bytesBiPer;
-        timeSumBi += (recvTimes[i] - sendTimes[i]);
+        double dt = recvTimes[i] - sendTimes[i];
+        if (dt > 0 && dt < simTime) {   // 过滤异常
+          bytesBi += bytesBiPer;
+          timeSumBi += dt;
+        }
       }
     }
-    double throughputBi = (timeSumBi > 0) ? (bytesBi * 8.0) / (timeSumBi * 1e6) : 0.0;
+    double throughputBi = (actualTransmissionTime > 0) ? (totalBytesBi * 8.0) / (actualTransmissionTime * 1e6) : 0.0; // 与下行同窗计算
 
     double originalBytes = double(nDone) * (respSize + headerSize);
     double savedBytes = originalBytes - totalBytesDown;
-    double compressionRatio = (savedBytes / originalBytes) * 100.0;
+    double compressionRatio = (originalBytes > 0) ? (savedBytes / originalBytes) * 100.0 : 0.0;
 
     std::cout << "Average delay of HTTP/3: " << avgDelay << " s" << std::endl;
 
@@ -1560,14 +1765,62 @@ int main(int argc, char* argv[]) {
 
     std::cout << "QPACK compression: saved " << std::fixed << std::setprecision(0) << savedBytes
               << " bytes (" << std::fixed << std::setprecision(1) << compressionRatio << "%)\n";
-      // 修复Page Load Time：改成单页窗口而不是全局
-    double pageLoadTime = (nDone > 0) ? (recvTimes.back() - sendTimes.front()) : 0.0;
+      // 修复Page Load Time：使用逐请求的均值
+    double pageLoadTime = 0.0;
+    if (nDone > 0) {
+      std::vector<double> individualPLTs;
+      for (size_t i = 0; i < n; ++i) {
+        if (recvTimes[i] > sendTimes[i]) {
+          double dt = recvTimes[i] - sendTimes[i];
+          if (dt > 0 && dt < simTime) {   // 过滤异常
+            individualPLTs.push_back(dt);
+          }
+        }
+      }
+      if (!individualPLTs.empty()) {
+        pageLoadTime = std::accumulate(individualPLTs.begin(), individualPLTs.end(), 0.0) / individualPLTs.size();
+      }
+    }
     std::cout << "Page Load Time (onLoad): " << std::fixed << std::setprecision(6) << pageLoadTime << " s\n";
     std::cout << "QUIC retransmissions: " << g_retxCount
               << "  rate: " << std::fixed << std::setprecision(3) << (g_retxCount / (totalTime > 0 ? totalTime : 1.0)) << " /s\n";
     std::cout << "RFC3550 jitter estimate: " << std::fixed << std::setprecision(6) << rfcJitter << " s\n";
     std::cout << "HoL events: " << holEvents << "  HoL blocked time: " << std::fixed << std::setprecision(6) << holBlockedTime << " s\n";
     std::cout << "------------------------------------------\n";
+
+    // ---- Structured one-line summary for CSV harvesting ----
+    auto parseMs = [](const std::string &s)->int{
+      try {
+        size_t pos = s.find("ms");
+        if (pos != std::string::npos) return std::stoi(s.substr(0,pos));
+        return std::stoi(s);
+      } catch (...) { return 0; }
+    };
+    auto parseMbps = [](const std::string &s)->double{
+      try {
+        size_t pos = s.find("Mbps");
+        if (pos != std::string::npos) return std::stod(s.substr(0,pos));
+        return std::stod(s);
+      } catch (...) { return 0.0; }
+    };
+    int delayMsOut = parseMs(delay);
+    double bwOut = parseMbps(dataRate);
+    double lossOut = errorRate;
+    double p50s = pageLoadTime;
+
+    std::cout << "CSV_SUMMARY "
+              << "latency_ms=" << delayMsOut
+              << " bandwidth_mbps=" << std::fixed << std::setprecision(3) << bwOut
+              << " loss_rate=" << std::setprecision(6) << lossOut
+              << " throughput_mbps=" << std::setprecision(3) << throughputDown
+              << " plt_s=" << std::setprecision(6) << p50s
+              << " retx_count=" << g_retxCount
+              << " jitter_s=" << std::setprecision(6) << rfcJitter
+              << " hol_events=" << holEvents
+              << " hol_time_s=" << std::setprecision(6) << holBlockedTime
+              << " qpack_saved_bytes=" << (long long)std::llround(savedBytes)
+              << " qpack_compression_percent=" << std::setprecision(1) << compressionRatio
+              << std::endl;
   }
 
   flowmon->CheckForLostPackets();
@@ -1592,6 +1845,14 @@ int main(int argc, char* argv[]) {
   }
   flowmon->SerializeToXmlFile("flowmon.xml", true, true);
 
+  // 验证数据完整性
+  std::cout << "\n------ Data Integrity Verification ------\n";
+  for (auto& client : clients) {
+    client->VerifyCompletedStreams();
+  }
+  std::cout << "------------------------------------------\n";
+
   Simulator::Destroy();
   return 0;
 }
+

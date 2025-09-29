@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "metrics": {
+    "completed_responses": 100,
+    "total_requests": 100,
+    "avg_delay": 2.606,
+    "page_load_time": 44.162475,
+    "throughput": 18.996,
+    "tcp_retransmissions": 0,
+    "jitter": 0.045778,
+    "hol_stall_time": 0.0,
+    "hol_stall_ratio": 0.0
+  },
+  "params": {
+    "nRequests": "100",
+    "respSize": "1048576",
+    "dataRate": "100Mbps",
+    "delay": "10ms",
+    "errorRate": "0.0",
+    "nStreams": "6",
+    "connWindowMB": "32",
+    "simTime": "120"
+  }
+}

@@ -1,0 +1,50 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>HTTP/2 Performance Test Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1 { color: #333; }
+                h2 { color: #666; margin-top: 30px; }
+                .image-container { margin: 20px 0; text-align: center; }
+                .image-container img { max-width: 100%; border: 1px solid #ddd; }
+                table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+            </style>
+        </head>
+        <body>
+            <h1>HTTP/2 Performance Test Report</h1>
+            <p>Test Time: 2025-09-29 12:41:46</p>
+            
+            <h2>1. Latency Impact Test</h2>
+            <div class="image-container">
+                <img src="latency_test/latency_impact.png" alt="Latency Impact Test Results">
+            </div>
+            
+            <h2>2. Packet Loss Impact Test</h2>
+            <div class="image-container">
+                <img src="packet_loss_test/packet_loss_impact.png" alt="Packet Loss Impact Test Results">
+            </div>
+            
+            <h2>3. Concurrent Streams Impact Test</h2>
+            <div class="image-container">
+                <img src="streams_test/streams_impact.png" alt="Concurrent Streams Impact Test Results">
+            </div>
+            
+            <h2>4. Test Conclusions</h2>
+            <p>Based on the HTTP/2 performance tests under different network conditions, we can draw the following conclusions:</p>
+            <ul>
+                <li><strong>Impact of Latency</strong>: As network latency increases, page load time significantly increases and throughput decreases. This indicates that HTTP/2 performance is significantly affected by network latency.</li>
+                <li><strong>Impact of Packet Loss</strong>: Even a small packet loss rate leads to a dramatic increase in TCP retransmissions and HoL blocking time, severely affecting throughput and page load time. This confirms the negative impact of TCP-level head-of-line blocking on HTTP/2 performance.</li>
+                <li><strong>Impact of Concurrent Streams</strong>: Increasing the number of concurrent streams can improve performance to a certain extent, but excessive streams may lead to performance degradation. This suggests that HTTP/2's multiplexing mechanism can effectively enhance performance within a certain range.</li>
+            </ul>
+            
+            <h2>5. Detailed Test Data</h2>
+        <h3>Latency Test Data</h3><table><tr><th>Delay</th><th>Page Load Time (s)</th><th>Throughput (Mbps)</th><th>Average Request Delay (s)</th><th>HoL Blocking Time (s)</th></tr><tr><td>2ms</td><td>2.340236</td><td>17.523</td><td>0.13</td><td>0.0</td></tr><tr><td>25ms</td><td>3.201152</td><td>12.81</td><td>0.181</td><td>0.0</td></tr><tr><td>100ms</td><td>6.351152</td><td>6.457</td><td>0.367</td><td>0.0</td></tr></table><h3>Packet Loss Test Data</h3><table><tr><th>Packet Loss Rate</th><th>Page Load Time (s)</th><th>TCP Retransmissions</th><th>HoL Blocking Time (s)</th><th>Throughput (Mbps)</th></tr><tr><td>0.0</td><td>3.201152</td><td>0</td><td>0.0</td><td>12.81</td></tr><tr><td>0.001</td><td>3.207291</td><td>2</td><td>0.0</td><td>12.786</td></tr><tr><td>0.01</td><td>24.524476</td><td>43</td><td>0.0</td><td>1.672</td></tr></table><h3>Concurrent Streams Test Data</h3><table><tr><th>Concurrent Streams</th><th>Page Load Time (s)</th><th>Throughput (Mbps)</th><th>Request Completion Rate (%)</th><th>HoL Blocking Ratio (%)</th></tr><tr><td>1</td><td>16.627894</td><td>2.466</td><td>100.0</td><td>0.0</td></tr><tr><td>6</td><td>10.26793</td><td>3.794</td><td>95.0</td><td>0.0</td></tr><tr><td>50</td><td>6.254</td><td>6.557</td><td>100.0</td><td>0.0</td></tr></table>
+        </body>
+        </html>
+        

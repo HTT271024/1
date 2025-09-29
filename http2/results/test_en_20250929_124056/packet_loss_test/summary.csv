@@ -1,0 +1,4 @@
+error_rate,completed_responses,total_requests,avg_delay,page_load_time,throughput,tcp_retransmissions,jitter,hol_stall_time,hol_stall_ratio,error_rate
+0.0,100,100,0.181,3.201152,12.81,0,0.00301,0.0,0.0,0.0
+0.001,100,100,0.181,3.207291,12.786,2,0.003011,0.0,0.0,0.001
+0.01,100,100,0.8,24.524476,1.672,43,1.029854,0.0,0.0,0.01

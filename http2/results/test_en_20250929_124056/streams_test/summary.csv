@@ -1,0 +1,4 @@
+streams,completed_responses,total_requests,avg_delay,page_load_time,throughput,tcp_retransmissions,jitter,hol_stall_time,hol_stall_ratio,streams
+1,100,100,0.156,16.627894,2.466,7,0.008538,0.0,0.0,1
+6,95,100,0.606,10.26793,3.794,6,0.030755,0.0,0.0,6
+50,100,100,1.968,6.254,6.557,6,0.085347,0.0,0.0,50
