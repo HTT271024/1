@@ -23,7 +23,7 @@ NS_LOG_COMPONENT_DEFINE("HTTP2App");
 
 
 // HTTP/2 Frame Type
-enum FrameType { HEADERS, DATA, PUSH_PROMISE };
+enum FrameType { HEADERS, DATA, PUSH_PROMISE, WINDOW_UPDATE };
 
 
 // HTTP/2 Frame with stream ID prefix for lightweight multiplexing
@@ -83,7 +83,7 @@ struct HTTP2Frame {
                    std::string typeStr = data.substr(pos, end - pos);
                    if (!typeStr.empty() && typeStr.find_first_not_of("0123456789") == std::string::npos) {
                        int typeVal = std::stoi(typeStr);
-                       if (typeVal >= 0 && typeVal <= 2) { // Valid FrameType range
+                       if (typeVal >= 0 && typeVal <= 3) { // Valid FrameType range
                            frame.type = static_cast<FrameType>(typeVal);
                            pos = end + 1;
                        } else {
@@ -383,6 +383,46 @@ public:
    const std::vector<double>& GetReqSendTimes() const { return m_reqSendTimes; }
    const std::vector<double>& GetRespRecvTimes() const { return m_respRecvTimes; }
    double GetInterval() const { return m_interval; }
+   
+   // 新增: 窗口更新阈值和计数器 - 移到public部分
+   uint64_t m_windowUpdateThreshold = 16384; // 16KB
+   
+   // 新增: 发送窗口更新帧
+   void SendWindowUpdate(uint32_t streamId, uint32_t bytesToAdd) {
+       if (!m_connected || !m_session) return;
+       
+       HTTP2Frame frame;
+       frame.streamId = streamId;
+       frame.type = WINDOW_UPDATE;
+       std::ostringstream oss;
+       oss << bytesToAdd;
+       frame.payload = oss.str();
+       frame.length = frame.payload.size();
+       
+       std::cout << "[CLIENT_WINDOW_UPDATE] t=" << Simulator::Now().GetSeconds() 
+                 << "s, replenishing " << bytesToAdd << " bytes for stream " 
+                 << streamId << std::endl;
+       
+       m_session->SendFrame(frame);
+   }
+   
+   // 新增: 发送连接级窗口更新
+   void SendConnectionWindowUpdate(uint32_t bytesToAdd) {
+       if (!m_connected || !m_session) return;
+       
+       HTTP2Frame frame;
+       frame.streamId = 0; // 连接级窗口更新使用streamId=0
+       frame.type = WINDOW_UPDATE;
+       std::ostringstream oss;
+       oss << bytesToAdd;
+       frame.payload = oss.str();
+       frame.length = frame.payload.size();
+       
+       std::cout << "[CLIENT_CONN_WINDOW_UPDATE] t=" << Simulator::Now().GetSeconds() 
+                 << "s, replenishing " << bytesToAdd << " bytes for connection" << std::endl;
+       
+       m_session->SendFrame(frame);
+   }
    
    // ★ New: finalize any streams that reached target but were not marked completed (end-of-sim safety)
    void FinalizePendingCompletions() {
@@ -779,6 +819,24 @@ private:
                          << ", " << m_streamBytes[frame.streamId] << "/"
                          << (m_streamTargetBytes.count(frame.streamId) ?
                              m_streamTargetBytes[frame.streamId] : 0) << " bytes" << std::endl;
+               
+               // 新增: 累计处理的字节数并触发窗口更新
+               m_streamBytesProcessed[frame.streamId] += frame.payload.size();
+               m_connBytesProcessed += frame.payload.size();
+               
+               // 检查是否需要发送流级窗口更新
+               if (m_streamBytesProcessed[frame.streamId] >= m_windowUpdateThreshold) {
+                   uint32_t bytesToAdd = m_streamBytesProcessed[frame.streamId];
+                   m_streamBytesProcessed[frame.streamId] = 0;
+                   SendWindowUpdate(frame.streamId, bytesToAdd);
+               }
+               
+               // 检查是否需要发送连接级窗口更新
+               if (m_connBytesProcessed >= m_windowUpdateThreshold) {
+                   uint32_t bytesToAdd = m_connBytesProcessed;
+                   m_connBytesProcessed = 0;
+                   SendConnectionWindowUpdate(bytesToAdd);
+               }
               
                // 检查流是否完成
                if (m_streamTargetBytes.find(frame.streamId) != m_streamTargetBytes.end() &&
@@ -846,6 +904,10 @@ private:
    
    // Stream state management for HTTP/2 compliance
    std::map<uint32_t, bool> m_inflight; // Track which streams are currently active
+   
+   // 新增: 窗口更新阈值和计数器
+   std::map<uint32_t, uint64_t> m_streamBytesProcessed; // 每个流已处理但未发送更新的字节数
+   uint64_t m_connBytesProcessed = 0; // 连接级已处理但未发送更新的字节数
 };
 
 
@@ -909,13 +971,11 @@ private:
            
            std::cout << "[Server] Received packet of size " << packet->GetSize() << " bytes" << std::endl;
 
-
            // 2) 追加到缓冲区
            std::string chunk;
            chunk.resize(packet->GetSize());
            packet->CopyData(reinterpret_cast<uint8_t*>(&chunk[0]), packet->GetSize());
            m_buffer += chunk;
-
 
            // 3) 在缓冲里"按帧"解析（以下一个 "SID:" 作为帧边界）
            size_t pos = 0;
@@ -946,10 +1006,42 @@ private:
                HTTP2Frame frame = HTTP2Frame::Parse(frameData);
                std::cout << "[Server] Parsed frame: sid=" << frame.streamId << ", type=" << (int)frame.type << ", len=" << frame.length << std::endl;
 
-
-               std::cout << "[Server] Checking frame type: " << (int)frame.type << " == HEADERS(" << (int)HEADERS << ") = " << (frame.type == HEADERS ? "true" : "false") << std::endl;
-               
-               if (frame.type == HEADERS) {
+               // 新增: 处理WINDOW_UPDATE帧
+               if (frame.type == WINDOW_UPDATE) {
+                   uint32_t bytesToAdd = 0;
+                   try {
+                       bytesToAdd = std::stoul(frame.payload);
+                   } catch (const std::exception& e) {
+                       std::cout << "[Server] Failed to parse WINDOW_UPDATE payload: " << e.what() << std::endl;
+                       bytesToAdd = 16384; // 默认值
+                   }
+                   
+                   if (frame.streamId == 0) {
+                       // 连接级窗口更新
+                       m_connWindowBytes = std::min(m_connWindowBytes + bytesToAdd, m_connWindowInit);
+                       std::cout << "[SERVER_WINDOW_REPLENISHED] t=" << Simulator::Now().GetSeconds() 
+                                 << "s, connWin is now " << m_connWindowBytes << " bytes." << std::endl;
+                   } else {
+                       // 流级窗口更新
+                       if (m_streamSendWindow.find(frame.streamId) != m_streamSendWindow.end()) {
+                           m_streamSendWindow[frame.streamId] = std::min(
+                               m_streamSendWindow[frame.streamId] + bytesToAdd, 
+                               m_streamWindowInit
+                           );
+                           std::cout << "[SERVER_STREAM_WINDOW_REPLENISHED] t=" << Simulator::Now().GetSeconds() 
+                                     << "s, stream " << frame.streamId << " window is now " 
+                                     << m_streamSendWindow[frame.streamId] << " bytes." << std::endl;
+                       }
+                   }
+                   
+                   // 如果之前因为流控阻塞而停止发送，现在恢复发送
+                   if (!m_sending && !m_pendingQueue.empty()) {
+                       m_sending = true;
+                       Simulator::Schedule(MicroSeconds(m_tickUs),
+                                          &HTTP2ServerApp::SendTick, this, s);
+                   }
+               }
+               else if (frame.type == HEADERS) {
                    std::cout << "[Server] Processing HEADERS frame for stream " << frame.streamId << std::endl;
                    if (m_reqsHandled < m_maxReqs) {
                        m_reqsHandled++;
@@ -1004,7 +1096,7 @@ private:
                        if (!m_sending) {
                            m_sending = true;
                            Simulator::Schedule(MicroSeconds(m_tickUs),
-                                               &HTTP2ServerApp::SendTick, this, s);
+                                              &HTTP2ServerApp::SendTick, this, s);
                        }
                    }
                } else if (frame.type == DATA) {
@@ -1013,10 +1105,8 @@ private:
                    // 其他类型（PUSH_PROMISE 等）按需扩展
                }
 
-
                pos = frameEnd;
            }
-
 
            // 4) 只保留未处理完的尾部（可能是不完整帧）
            if (pos < m_buffer.size()) {
@@ -1168,8 +1258,10 @@ int main(int argc, char *argv[]) {
    uint32_t connWindowMB = 32;   // Connection-level window size in MB
    uint32_t streamWindowMB = 32; // Stream-level window size in MB
    double simTime = 60.0;        // 默认仿真时间 60s
-
-
+   
+   // 新增窗口更新相关参数
+   uint32_t windowUpdateThreshold = 16384; // 16KB
+   
    CommandLine cmd;
    cmd.AddValue("nRequests", "Number of HTTP requests", nRequests);
    cmd.AddValue("respSize", "HTTP response size (bytes)", respSize);
@@ -1193,6 +1285,7 @@ int main(int argc, char *argv[]) {
    cmd.AddValue("connWindowMB", "Connection-level flow control window size in MB", connWindowMB);
    cmd.AddValue("streamWindowMB", "Stream-level flow control window size in MB", streamWindowMB);
    cmd.AddValue("simTime", "Simulation time in seconds", simTime);
+   cmd.AddValue("windowUpdateThreshold", "Threshold for sending WINDOW_UPDATE frames (bytes)", windowUpdateThreshold);
    cmd.Parse(argc, argv);
 
 
@@ -1254,6 +1347,7 @@ int main(int argc, char *argv[]) {
        uint32_t reqs = baseReqs + (i < rem ? 1 : 0); // 平均分配请求
        Ptr<HTTP2ClientApp> client = CreateObject<HTTP2ClientApp>();
        client->Setup(interfaces.GetAddress(1), httpPort, reqSize, reqs, interval, thirdParty, nStreams);
+       client->m_windowUpdateThreshold = windowUpdateThreshold; // 设置窗口更新阈值
        nodes.Get(0)->AddApplication(client);
        client->SetStartTime(Seconds(1.0 + i * 0.01)); // 避免完全同时启动
        client->SetStopTime(Seconds(simTime));
