@@ -1,4 +1,3 @@
-Consolidate compiler generated dependencies of target scratch_http3_http3
 CWND_LOG,0.51,12000,0
 CWND_LOG,0.52,12000,0
 CWND_LOG,0.53,12000,0
@@ -48,19 +47,46 @@ CWND_LOG,0.96,12000,0
 CWND_LOG,0.97,12000,0
 CWND_LOG,0.98,12000,0
 CWND_LOG,0.99,12000,0
+[QUIC] Estimated RTT: 10ms, handshake delay: 10ms
 CWND_LOG,1,12000,0
+[QUIC] Sent packet 1 with STREAM frame for stream 1 size=127 fin=0 (bytesInFlight=184)
 [QUIC] SEND FIN sid=1 pkt=2
+[QUIC] Sent packet 2 with STREAM frame for stream 1 size=25 fin=1 (bytesInFlight=266)
+[QUIC] Sent packet 3 with STREAM frame for stream 2 size=127 fin=0 (bytesInFlight=450)
 [QUIC] SEND FIN sid=2 pkt=4
+[QUIC] Sent packet 4 with STREAM frame for stream 2 size=25 fin=1 (bytesInFlight=532)
+[QUIC] Sent packet 5 with STREAM frame for stream 3 size=127 fin=0 (bytesInFlight=716)
 [QUIC] SEND FIN sid=3 pkt=6
+[QUIC] Sent packet 6 with STREAM frame for stream 3 size=25 fin=1 (bytesInFlight=798)
 CWND_LOG,1.01,12000,0
 CWND_LOG,1.02,12000,0
 CWND_LOG,1.03,12000,0
+[QUIC] Received packet 1 with STREAM frame for stream 1 size=127 fin=0
+[QUIC] Sent packet 1 with STREAM frame for stream 1 size=86 fin=0 (bytesInFlight=142)
+[QUIC] Sent packet 3 with STREAM frame for stream 1 size=1136 fin=0 (bytesInFlight=1338)
+[QUIC] Sent packet 4 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=2539)
+[QUIC] Sent packet 5 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=3740)
+[QUIC] Sent packet 6 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=4941)
+[QUIC] Sent packet 7 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=6142)
+[QUIC] Sent packet 8 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=7343)
+[QUIC] Sent packet 9 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=8544)
+[QUIC] Sent packet 10 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=9746)
+[QUIC] Sent packet 11 with STREAM frame for stream 1 size=1139 fin=0 (bytesInFlight=10948)
 [QUIC] SEND FIN sid=1 pkt=12
+[QUIC] Sent packet 12 with STREAM frame for stream 1 size=298 fin=1 (bytesInFlight=11308)
+[QUIC] Received packet 2 with STREAM frame for stream 1 size=25 fin=1
 [QUIC] Received FIN for stream 1 in packet 2
+[QUIC] Received packet 3 with STREAM frame for stream 2 size=127 fin=0
+[QUIC] Sent packet 14 with STREAM frame for stream 2 size=86 fin=0 (bytesInFlight=11451)
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11451 need=1197
 [QUIC] SEND FIN sid=2 pkt=25
+[QUIC] Sent packet 25 with STREAM frame for stream 2 size=298 fin=1 (bytesInFlight=11811)
+[QUIC] Received packet 4 with STREAM frame for stream 2 size=25 fin=1
 [QUIC] Received FIN for stream 2 in packet 4
+[QUIC] Received packet 5 with STREAM frame for stream 3 size=127 fin=0
+[QUIC] Sent packet 27 with STREAM frame for stream 3 size=86 fin=0 (bytesInFlight=11954)
 [QUIC] SEND FIN sid=3 pkt=38
+[QUIC] Received packet 6 with STREAM frame for stream 3 size=25 fin=1
 [QUIC] Received FIN for stream 3 in packet 6
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1197
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1197
@@ -73,16 +99,110 @@ CWND_LOG,1.04,12000,11954
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 CWND_LOG,1.05,12000,11954
+[QUIC] Received packet 1 with STREAM frame for stream 1 size=86 fin=0
+[DEBUG] Stream 1 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 1
+[DEBUG] Received HEADERS for stream 1
+[DEBUG] Set target for stream 1: 10240 bytes
+[DEBUG] Stream 1 removing 86 bytes, remaining: 0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 120ms
 [QUIC] ACK largest=1 bytesAcked=184 cwnd=12184 inflight=614 retx=0
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
+[QUIC] Received packet 3 with STREAM frame for stream 1 size=1136 fin=0
+[DEBUG] Stream 1 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 1 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 1 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 4 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 1 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 5 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 1 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 6 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 1 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 7 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 1 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 8 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 1 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 9 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 1 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 10 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 1 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 11 with STREAM frame for stream 1 size=1139 fin=0
+[DEBUG] Stream 1 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 1 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 1 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 12 with STREAM frame for stream 1 size=298 fin=1
 [QUIC] Received FIN for stream 1 in packet 12
+[DEBUG] Stream 1 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 1
+[DEBUG] MarkReceived: stream=1 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.05095,1,10240
+[DEBUG] Stream 1 completed via offset reassembly! Total: 1/20
+[DEBUG] Stream 1 removing 298 bytes, remaining: 0
+[DEBUG] Received FIN for stream 1
+[DEBUG] Stream 1 progress: 10240/10240 bytes
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 101ms
 [QUIC] ACK largest=2 bytesAcked=82 cwnd=12266 inflight=532 retx=0
+[QUIC] Received packet 14 with STREAM frame for stream 2 size=86 fin=0
+[DEBUG] Stream 2 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 2
+[DEBUG] Received HEADERS for stream 2
+[DEBUG] Set target for stream 2: 10240 bytes
+[DEBUG] Stream 2 removing 86 bytes, remaining: 0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=3 bytesAcked=184 cwnd=12450 inflight=348 retx=0
+[QUIC] Received packet 25 with STREAM frame for stream 2 size=298 fin=1
 [QUIC] Received FIN for stream 2 in packet 25
+[DEBUG] Stream 2 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=9972 len=268 total=268 bytes
+[DEBUG] Stream 2 received DATA: offset=9972 len=268 total: 268/10240 bytes
+[DEBUG] Stream 2 removing 298 bytes, remaining: 0
 [WARN] FIN before target on stream 2 got=268 need=10240
+[DEBUG] Received FIN for stream 2
+[DEBUG] Stream 2 progress: 268/10240 bytes
+[QUIC] RTT update: 41ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=4 bytesAcked=82 cwnd=12532 inflight=266 retx=0
+[QUIC] Received packet 27 with STREAM frame for stream 3 size=86 fin=0
+[DEBUG] Stream 3 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 3
+[DEBUG] Received HEADERS for stream 3
+[DEBUG] Set target for stream 3: 10240 bytes
+[DEBUG] Stream 3 removing 86 bytes, remaining: 0
+[QUIC] RTT update: 41ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=5 bytesAcked=184 cwnd=12716 inflight=82 retx=0
+[QUIC] RTT update: 41ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=6 bytesAcked=82 cwnd=12798 inflight=0 retx=0
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
@@ -90,65 +210,268 @@ STREAM_COMPLETED_LOG,1.05095,1,10240
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 CWND_LOG,1.06,12000,11954
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
+[QUIC] Sent packet 31 with STREAM frame for stream 4 size=127 fin=0 (bytesInFlight=185)
 [QUIC] SEND FIN sid=4 pkt=32
+[QUIC] Sent packet 32 with STREAM frame for stream 4 size=25 fin=1 (bytesInFlight=268)
+[QUIC] Sent packet 33 with STREAM frame for stream 5 size=127 fin=0 (bytesInFlight=453)
 [QUIC] SEND FIN sid=5 pkt=34
+[QUIC] Sent packet 34 with STREAM frame for stream 5 size=25 fin=1 (bytesInFlight=536)
+[QUIC] Sent packet 35 with STREAM frame for stream 6 size=127 fin=0 (bytesInFlight=721)
 [QUIC] SEND FIN sid=6 pkt=36
+[QUIC] Sent packet 36 with STREAM frame for stream 6 size=25 fin=1 (bytesInFlight=804)
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 [QUIC] Congestion control blocked: cwnd=12000 bytesInFlight=11954 need=1198
 CWND_LOG,1.07,12000,11954
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 120ms
 [QUIC] ACK largest=1 bytesAcked=142 cwnd=12142 inflight=11812 retx=0
 [QUIC] Congestion control blocked: cwnd=12142 bytesInFlight=11812 need=1198
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=12142 inflight=11812 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=3 bytesAcked=1196 cwnd=13338 inflight=10616 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=13338 inflight=10616 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=4 bytesAcked=1201 cwnd=14539 inflight=9415 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=14539 inflight=9415 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=5 bytesAcked=1201 cwnd=15740 inflight=8214 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=15740 inflight=8214 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=6 bytesAcked=1201 cwnd=16941 inflight=7013 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=16941 inflight=7013 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=7 bytesAcked=1201 cwnd=18142 inflight=5812 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=18142 inflight=5812 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=8 bytesAcked=1201 cwnd=19343 inflight=4611 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=19343 inflight=4611 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=9 bytesAcked=1201 cwnd=20544 inflight=3410 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=20544 inflight=3410 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=10 bytesAcked=1202 cwnd=21746 inflight=2208 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=21746 inflight=2208 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=11 bytesAcked=1202 cwnd=22948 inflight=1006 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=12 bytesAcked=360 cwnd=23308 inflight=646 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=14 bytesAcked=143 cwnd=23451 inflight=503 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=23451 inflight=503 retx=0
+[QUIC] RTT update: 40ms, SRTT: 40ms, RTO: 100ms
 [QUIC] ACK largest=25 bytesAcked=360 cwnd=23811 inflight=143 retx=0
 [QUIC] ACK largest=39 bytesAcked=143 cwnd=23954 inflight=0 retx=0
 CWND_LOG,1.08,23954,0
+[QUIC] Sent packet 420 with STREAM frame for stream 2 size=1136 fin=0 (bytesInFlight=1198)
+[QUIC] Sent packet 421 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=2401)
+[QUIC] Sent packet 422 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=3604)
+[QUIC] Sent packet 423 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=4807)
+[QUIC] Sent packet 424 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=6010)
+[QUIC] Sent packet 425 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=7213)
+[QUIC] Sent packet 426 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=8416)
+[QUIC] Sent packet 427 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=9619)
+[QUIC] Sent packet 428 with STREAM frame for stream 2 size=1139 fin=0 (bytesInFlight=10822)
+[QUIC] Sent packet 429 with STREAM frame for stream 3 size=1136 fin=0 (bytesInFlight=12020)
+[QUIC] Sent packet 430 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=13223)
+[QUIC] Sent packet 431 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=14426)
+[QUIC] Sent packet 432 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=15629)
+[QUIC] Sent packet 433 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=16832)
+[QUIC] Sent packet 434 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=18035)
+[QUIC] Sent packet 435 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=19238)
+[QUIC] Sent packet 436 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=20441)
+[QUIC] Sent packet 437 with STREAM frame for stream 3 size=1139 fin=0 (bytesInFlight=21644)
+[QUIC] Sent packet 438 with STREAM frame for stream 3 size=298 fin=1 (bytesInFlight=22005)
+[QUIC] Received packet 31 with STREAM frame for stream 4 size=127 fin=0
+[QUIC] Sent packet 439 with STREAM frame for stream 4 size=86 fin=0 (bytesInFlight=22149)
+[QUIC] Sent packet 440 with STREAM frame for stream 4 size=1136 fin=0 (bytesInFlight=23347)
 [QUIC] Congestion control blocked: cwnd=23954 bytesInFlight=23347 need=1203
 [QUIC] SEND FIN sid=4 pkt=449
+[QUIC] Sent packet 449 with STREAM frame for stream 4 size=298 fin=1 (bytesInFlight=23708)
+[QUIC] Received packet 32 with STREAM frame for stream 4 size=25 fin=1
 [QUIC] Received FIN for stream 4 in packet 32
+[QUIC] Received packet 33 with STREAM frame for stream 5 size=127 fin=0
+[QUIC] Sent packet 450 with STREAM frame for stream 5 size=86 fin=0 (bytesInFlight=23852)
 [QUIC] SEND FIN sid=5 pkt=460
+[QUIC] Received packet 34 with STREAM frame for stream 5 size=25 fin=1
 [QUIC] Received FIN for stream 5 in packet 34
+[QUIC] Received packet 35 with STREAM frame for stream 6 size=127 fin=0
 [QUIC] SEND FIN sid=6 pkt=471
+[QUIC] Received packet 36 with STREAM frame for stream 6 size=25 fin=1
 [QUIC] Received FIN for stream 6 in packet 36
 CWND_LOG,1.09,23954,23852
 [QUIC] Congestion control blocked: cwnd=23954 bytesInFlight=23852 need=1203
 CWND_LOG,1.1,23954,23852
+[QUIC] Received packet 420 with STREAM frame for stream 2 size=1136 fin=0
+[DEBUG] Stream 2 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=0 len=1108 total=1376 bytes
+[DEBUG] Stream 2 received DATA: offset=0 len=1108 total: 1376/10240 bytes
+[DEBUG] Stream 2 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 421 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=1108 len=1108 total=2484 bytes
+[DEBUG] Stream 2 received DATA: offset=1108 len=1108 total: 2484/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 422 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=2216 len=1108 total=3592 bytes
+[DEBUG] Stream 2 received DATA: offset=2216 len=1108 total: 3592/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 423 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=3324 len=1108 total=4700 bytes
+[DEBUG] Stream 2 received DATA: offset=3324 len=1108 total: 4700/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 424 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=4432 len=1108 total=5808 bytes
+[DEBUG] Stream 2 received DATA: offset=4432 len=1108 total: 5808/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 425 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=5540 len=1108 total=6916 bytes
+[DEBUG] Stream 2 received DATA: offset=5540 len=1108 total: 6916/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 426 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=6648 len=1108 total=8024 bytes
+[DEBUG] Stream 2 received DATA: offset=6648 len=1108 total: 8024/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 427 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=7756 len=1108 total=9132 bytes
+[DEBUG] Stream 2 received DATA: offset=7756 len=1108 total: 9132/10240 bytes
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 428 with STREAM frame for stream 2 size=1139 fin=0
+[DEBUG] Stream 2 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 2
+[DEBUG] MarkReceived: stream=2 offset=8864 len=1108 total=10240 bytes
 STREAM_COMPLETED_LOG,1.10094,2,10240
+[DEBUG] Stream 2 completed via offset reassembly! Total: 2/20
+[DEBUG] Stream 2 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 429 with STREAM frame for stream 3 size=1136 fin=0
+[DEBUG] Stream 3 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 3 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 3 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 430 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 3 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 431 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 3 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
 [QUIC] Congestion control blocked: cwnd=23954 bytesInFlight=23852 need=1203
+[QUIC] Received packet 432 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 3 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 433 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 3 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 434 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 3 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 435 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 3 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 436 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 3 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 437 with STREAM frame for stream 3 size=1139 fin=0
+[DEBUG] Stream 3 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 3 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 3 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 438 with STREAM frame for stream 3 size=298 fin=1
 [QUIC] Received FIN for stream 3 in packet 438
+[DEBUG] Stream 3 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 3
+[DEBUG] MarkReceived: stream=3 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.10185,3,10240
+[DEBUG] Stream 3 completed via offset reassembly! Total: 3/20
+[DEBUG] Stream 3 removing 298 bytes, remaining: 0
+[DEBUG] Received FIN for stream 3
+[DEBUG] Stream 3 progress: 10240/10240 bytes
+[QUIC] Received packet 439 with STREAM frame for stream 4 size=86 fin=0
+[DEBUG] Stream 4 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 4
+[DEBUG] Received HEADERS for stream 4
+[DEBUG] Set target for stream 4: 10240 bytes
+[DEBUG] Stream 4 removing 86 bytes, remaining: 0
+[QUIC] Received packet 440 with STREAM frame for stream 4 size=1136 fin=0
+[DEBUG] Stream 4 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 4 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 4 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 449 with STREAM frame for stream 4 size=298 fin=1
 [QUIC] Received FIN for stream 4 in packet 449
+[DEBUG] Stream 4 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=9972 len=268 total=1376 bytes
+[DEBUG] Stream 4 received DATA: offset=9972 len=268 total: 1376/10240 bytes
+[DEBUG] Stream 4 removing 298 bytes, remaining: 0
 [WARN] FIN before target on stream 4 got=1376 need=10240
+[DEBUG] Received FIN for stream 4
+[DEBUG] Stream 4 progress: 1376/10240 bytes
+[QUIC] Received packet 450 with STREAM frame for stream 5 size=86 fin=0
+[DEBUG] Stream 5 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 5
+[DEBUG] Received HEADERS for stream 5
+[DEBUG] Set target for stream 5: 10240 bytes
+[DEBUG] Stream 5 removing 86 bytes, remaining: 0
+[QUIC] RTT update: 46ms, SRTT: 41ms, RTO: 100ms
 [QUIC] ACK largest=36 bytesAcked=804 cwnd=13602 inflight=0 retx=0
 CWND_LOG,1.11,23954,23852
+[QUIC] Sent packet 57 with STREAM frame for stream 7 size=127 fin=0 (bytesInFlight=185)
 [QUIC] SEND FIN sid=7 pkt=58
+[QUIC] Sent packet 58 with STREAM frame for stream 7 size=25 fin=1 (bytesInFlight=268)
+[QUIC] Sent packet 59 with STREAM frame for stream 8 size=127 fin=0 (bytesInFlight=453)
 [QUIC] SEND FIN sid=8 pkt=60
+[QUIC] Sent packet 60 with STREAM frame for stream 8 size=25 fin=1 (bytesInFlight=536)
+[QUIC] Sent packet 61 with STREAM frame for stream 9 size=127 fin=0 (bytesInFlight=721)
 [QUIC] SEND FIN sid=9 pkt=62
+[QUIC] Sent packet 62 with STREAM frame for stream 9 size=25 fin=1 (bytesInFlight=804)
 [QUIC] Congestion control blocked: cwnd=23954 bytesInFlight=23852 need=1203
+[QUIC] Sent packet 63 with STREAM frame for stream 10 size=128 fin=0 (bytesInFlight=991)
 [QUIC] SEND FIN sid=10 pkt=64
+[QUIC] Sent packet 64 with STREAM frame for stream 10 size=26 fin=1 (bytesInFlight=1076)
+[QUIC] Sent packet 65 with STREAM frame for stream 11 size=128 fin=0 (bytesInFlight=1263)
 [QUIC] SEND FIN sid=11 pkt=66
+[QUIC] Sent packet 66 with STREAM frame for stream 11 size=26 fin=1 (bytesInFlight=1348)
+[QUIC] Sent packet 67 with STREAM frame for stream 12 size=128 fin=0 (bytesInFlight=1535)
 [QUIC] SEND FIN sid=12 pkt=68
+[QUIC] Sent packet 68 with STREAM frame for stream 12 size=26 fin=1 (bytesInFlight=1620)
 CWND_LOG,1.12,23954,23852
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=23954 inflight=23852 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=23954 inflight=23852 retx=0
@@ -170,45 +493,405 @@ CWND_LOG,1.12,23954,23852
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=23954 inflight=23852 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=23954 inflight=23852 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=23954 inflight=23852 retx=0
+[QUIC] RTT update: 45ms, SRTT: 41ms, RTO: 100ms
 [QUIC] ACK largest=450 bytesAcked=23852 cwnd=47806 inflight=0 retx=0
 CWND_LOG,1.13,47806,0
+[QUIC] Received packet 57 with STREAM frame for stream 7 size=127 fin=0
+[QUIC] Sent packet 589 with STREAM frame for stream 7 size=86 fin=0 (bytesInFlight=144)
+[QUIC] Sent packet 590 with STREAM frame for stream 7 size=1136 fin=0 (bytesInFlight=1342)
+[QUIC] Sent packet 591 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=2545)
+[QUIC] Sent packet 592 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=3748)
+[QUIC] Sent packet 593 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=4951)
+[QUIC] Sent packet 594 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=6154)
+[QUIC] Sent packet 595 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=7357)
+[QUIC] Sent packet 596 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=8560)
+[QUIC] Sent packet 597 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=9763)
+[QUIC] Sent packet 598 with STREAM frame for stream 7 size=1139 fin=0 (bytesInFlight=10966)
 [QUIC] SEND FIN sid=7 pkt=599
+[QUIC] Sent packet 599 with STREAM frame for stream 7 size=298 fin=1 (bytesInFlight=11327)
+[QUIC] Received packet 58 with STREAM frame for stream 7 size=25 fin=1
 [QUIC] Received FIN for stream 7 in packet 58
+[QUIC] Received packet 59 with STREAM frame for stream 8 size=127 fin=0
+[QUIC] Sent packet 600 with STREAM frame for stream 8 size=86 fin=0 (bytesInFlight=11471)
+[QUIC] Sent packet 601 with STREAM frame for stream 8 size=1136 fin=0 (bytesInFlight=12669)
+[QUIC] Sent packet 602 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=13872)
+[QUIC] Sent packet 603 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=15075)
+[QUIC] Sent packet 604 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=16278)
+[QUIC] Sent packet 605 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=17481)
+[QUIC] Sent packet 606 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=18684)
+[QUIC] Sent packet 607 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=19887)
+[QUIC] Sent packet 608 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=21090)
+[QUIC] Sent packet 609 with STREAM frame for stream 8 size=1139 fin=0 (bytesInFlight=22293)
 [QUIC] SEND FIN sid=8 pkt=610
+[QUIC] Sent packet 610 with STREAM frame for stream 8 size=298 fin=1 (bytesInFlight=22654)
+[QUIC] Received packet 60 with STREAM frame for stream 8 size=25 fin=1
 [QUIC] Received FIN for stream 8 in packet 60
+[QUIC] Received packet 61 with STREAM frame for stream 9 size=127 fin=0
+[QUIC] Sent packet 611 with STREAM frame for stream 9 size=86 fin=0 (bytesInFlight=22798)
+[QUIC] Sent packet 612 with STREAM frame for stream 9 size=1136 fin=0 (bytesInFlight=23996)
+[QUIC] Sent packet 613 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=25199)
+[QUIC] Sent packet 614 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=26402)
+[QUIC] Sent packet 615 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=27605)
+[QUIC] Sent packet 616 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=28808)
+[QUIC] Sent packet 617 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=30011)
+[QUIC] Sent packet 618 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=31214)
+[QUIC] Sent packet 619 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=32417)
+[QUIC] Sent packet 620 with STREAM frame for stream 9 size=1139 fin=0 (bytesInFlight=33620)
 [QUIC] SEND FIN sid=9 pkt=621
+[QUIC] Sent packet 621 with STREAM frame for stream 9 size=298 fin=1 (bytesInFlight=33981)
+[QUIC] Received packet 62 with STREAM frame for stream 9 size=25 fin=1
 [QUIC] Received FIN for stream 9 in packet 62
+[QUIC] Sent packet 622 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=35184)
+[QUIC] Sent packet 623 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=36387)
+[QUIC] Sent packet 624 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=37590)
+[QUIC] Sent packet 625 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=38793)
+[QUIC] Sent packet 626 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=39996)
+[QUIC] Sent packet 627 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=41199)
+[QUIC] Sent packet 628 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=42402)
+[QUIC] Sent packet 629 with STREAM frame for stream 4 size=1139 fin=0 (bytesInFlight=43605)
+[QUIC] Sent packet 630 with STREAM frame for stream 5 size=1136 fin=0 (bytesInFlight=44803)
+[QUIC] Sent packet 631 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=46006)
+[QUIC] Sent packet 632 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=47209)
 [QUIC] Congestion control blocked: cwnd=47806 bytesInFlight=47209 need=1203
+[QUIC] Sent packet 639 with STREAM frame for stream 5 size=298 fin=1 (bytesInFlight=47570)
+[QUIC] Sent packet 640 with STREAM frame for stream 6 size=86 fin=0 (bytesInFlight=47714)
+[QUIC] Received packet 63 with STREAM frame for stream 10 size=128 fin=0
 [QUIC] SEND FIN sid=10 pkt=661
+[QUIC] Received packet 64 with STREAM frame for stream 10 size=26 fin=1
 [QUIC] Received FIN for stream 10 in packet 64
+[QUIC] Received packet 65 with STREAM frame for stream 11 size=128 fin=0
 [QUIC] SEND FIN sid=11 pkt=672
+[QUIC] Received packet 66 with STREAM frame for stream 11 size=26 fin=1
 [QUIC] Received FIN for stream 11 in packet 66
+[QUIC] Received packet 67 with STREAM frame for stream 12 size=128 fin=0
 [QUIC] SEND FIN sid=12 pkt=683
+[QUIC] Received packet 68 with STREAM frame for stream 12 size=26 fin=1
 [QUIC] Received FIN for stream 12 in packet 68
 CWND_LOG,1.14,47806,47714
 [QUIC] Congestion control blocked: cwnd=47806 bytesInFlight=47714 need=1203
 CWND_LOG,1.15,47806,47714
+[QUIC] Received packet 589 with STREAM frame for stream 7 size=86 fin=0
+[DEBUG] Stream 7 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 7
+[DEBUG] Received HEADERS for stream 7
+[DEBUG] Set target for stream 7: 10240 bytes
+[DEBUG] Stream 7 removing 86 bytes, remaining: 0
+[QUIC] Received packet 590 with STREAM frame for stream 7 size=1136 fin=0
+[DEBUG] Stream 7 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 7 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 7 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 591 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 7 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 592 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 7 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 593 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 7 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 594 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 7 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 595 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 7 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 596 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 7 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 597 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 7 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 598 with STREAM frame for stream 7 size=1139 fin=0
+[DEBUG] Stream 7 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 7 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 7 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 599 with STREAM frame for stream 7 size=298 fin=1
 [QUIC] Received FIN for stream 7 in packet 599
+[DEBUG] Stream 7 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 7
+[DEBUG] MarkReceived: stream=7 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.15189,7,10240
+[DEBUG] Stream 7 completed via offset reassembly! Total: 4/20
+[DEBUG] Stream 7 removing 298 bytes, remaining: 0
+[DEBUG] Received FIN for stream 7
+[DEBUG] Stream 7 progress: 10240/10240 bytes
+[QUIC] Received packet 600 with STREAM frame for stream 8 size=86 fin=0
+[DEBUG] Stream 8 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 8
+[DEBUG] Received HEADERS for stream 8
+[DEBUG] Set target for stream 8: 10240 bytes
+[DEBUG] Stream 8 removing 86 bytes, remaining: 0
+[QUIC] Received packet 601 with STREAM frame for stream 8 size=1136 fin=0
+[DEBUG] Stream 8 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 8 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 8 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 602 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 8 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 603 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 8 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 604 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 8 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
 [QUIC] Congestion control blocked: cwnd=47806 bytesInFlight=47714 need=1203
+[QUIC] Received packet 605 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 8 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 606 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 8 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 607 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 8 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 608 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 8 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 609 with STREAM frame for stream 8 size=1139 fin=0
+[DEBUG] Stream 8 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 8 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 8 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 610 with STREAM frame for stream 8 size=298 fin=1
 [QUIC] Received FIN for stream 8 in packet 610
+[DEBUG] Stream 8 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 8
+[DEBUG] MarkReceived: stream=8 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.15282,8,10240
+[DEBUG] Stream 8 completed via offset reassembly! Total: 5/20
+[DEBUG] Stream 8 removing 298 bytes, remaining: 0
+[DEBUG] Received FIN for stream 8
+[DEBUG] Stream 8 progress: 10240/10240 bytes
+[QUIC] Received packet 611 with STREAM frame for stream 9 size=86 fin=0
+[DEBUG] Stream 9 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 9
+[DEBUG] Received HEADERS for stream 9
+[DEBUG] Set target for stream 9: 10240 bytes
+[DEBUG] Stream 9 removing 86 bytes, remaining: 0
+[QUIC] Received packet 612 with STREAM frame for stream 9 size=1136 fin=0
+[DEBUG] Stream 9 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 9 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 9 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 613 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 9 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 614 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 9 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 615 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 9 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 616 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 9 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 617 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 9 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 618 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 9 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 619 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 9 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 620 with STREAM frame for stream 9 size=1139 fin=0
+[DEBUG] Stream 9 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 9 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 9 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 621 with STREAM frame for stream 9 size=298 fin=1
 [QUIC] Received FIN for stream 9 in packet 621
+[DEBUG] Stream 9 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 9
+[DEBUG] MarkReceived: stream=9 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.15375,9,10240
+[DEBUG] Stream 9 completed via offset reassembly! Total: 6/20
+[DEBUG] Stream 9 removing 298 bytes, remaining: 0
+[DEBUG] Received FIN for stream 9
+[DEBUG] Stream 9 progress: 10240/10240 bytes
+[QUIC] Received packet 622 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=1108 len=1108 total=2484 bytes
+[DEBUG] Stream 4 received DATA: offset=1108 len=1108 total: 2484/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 623 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=2216 len=1108 total=3592 bytes
+[DEBUG] Stream 4 received DATA: offset=2216 len=1108 total: 3592/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 624 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=3324 len=1108 total=4700 bytes
+[DEBUG] Stream 4 received DATA: offset=3324 len=1108 total: 4700/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 625 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=4432 len=1108 total=5808 bytes
+[DEBUG] Stream 4 received DATA: offset=4432 len=1108 total: 5808/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 626 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=5540 len=1108 total=6916 bytes
+[DEBUG] Stream 4 received DATA: offset=5540 len=1108 total: 6916/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 627 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=6648 len=1108 total=8024 bytes
+[DEBUG] Stream 4 received DATA: offset=6648 len=1108 total: 8024/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 628 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=7756 len=1108 total=9132 bytes
+[DEBUG] Stream 4 received DATA: offset=7756 len=1108 total: 9132/10240 bytes
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 629 with STREAM frame for stream 4 size=1139 fin=0
+[DEBUG] Stream 4 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 4
+[DEBUG] MarkReceived: stream=4 offset=8864 len=1108 total=10240 bytes
 STREAM_COMPLETED_LOG,1.15454,4,10240
+[DEBUG] Stream 4 completed via offset reassembly! Total: 7/20
+[DEBUG] Stream 4 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 630 with STREAM frame for stream 5 size=1136 fin=0
+[DEBUG] Stream 5 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 5 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 5 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 631 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 5 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 632 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 5 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 639 with STREAM frame for stream 5 size=298 fin=1
 [QUIC] Received FIN for stream 5 in packet 639
+[DEBUG] Stream 5 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=9972 len=268 total=3592 bytes
+[DEBUG] Stream 5 received DATA: offset=9972 len=268 total: 3592/10240 bytes
+[DEBUG] Stream 5 removing 298 bytes, remaining: 0
 [WARN] FIN before target on stream 5 got=3592 need=10240
+[DEBUG] Received FIN for stream 5
+[DEBUG] Stream 5 progress: 3592/10240 bytes
+[QUIC] Received packet 640 with STREAM frame for stream 6 size=86 fin=0
+[DEBUG] Stream 6 buffer size: 86 after adding 86 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=26 frameLen=60 actualSize=86 for stream 6
+[DEBUG] Received HEADERS for stream 6
+[DEBUG] Set target for stream 6: 10240 bytes
+[DEBUG] Stream 6 removing 86 bytes, remaining: 0
+[QUIC] RTT update: 45ms, SRTT: 41ms, RTO: 100ms
 [QUIC] ACK largest=68 bytesAcked=1620 cwnd=15222 inflight=0 retx=0
 CWND_LOG,1.16,47806,47714
+[QUIC] Sent packet 108 with STREAM frame for stream 13 size=128 fin=0 (bytesInFlight=188)
 [QUIC] SEND FIN sid=13 pkt=109
+[QUIC] Sent packet 109 with STREAM frame for stream 13 size=26 fin=1 (bytesInFlight=274)
+[QUIC] Sent packet 110 with STREAM frame for stream 14 size=128 fin=0 (bytesInFlight=462)
 [QUIC] SEND FIN sid=14 pkt=111
+[QUIC] Sent packet 111 with STREAM frame for stream 14 size=26 fin=1 (bytesInFlight=548)
+[QUIC] Sent packet 112 with STREAM frame for stream 15 size=128 fin=0 (bytesInFlight=736)
 [QUIC] SEND FIN sid=15 pkt=113
+[QUIC] Sent packet 113 with STREAM frame for stream 15 size=26 fin=1 (bytesInFlight=822)
 [QUIC] Congestion control blocked: cwnd=47806 bytesInFlight=47714 need=1203
+[QUIC] Sent packet 114 with STREAM frame for stream 16 size=128 fin=0 (bytesInFlight=1010)
 [QUIC] SEND FIN sid=16 pkt=115
+[QUIC] Sent packet 115 with STREAM frame for stream 16 size=26 fin=1 (bytesInFlight=1096)
+[QUIC] Sent packet 116 with STREAM frame for stream 17 size=128 fin=0 (bytesInFlight=1284)
 [QUIC] SEND FIN sid=17 pkt=117
+[QUIC] Sent packet 117 with STREAM frame for stream 17 size=26 fin=1 (bytesInFlight=1370)
+[QUIC] Sent packet 118 with STREAM frame for stream 18 size=128 fin=0 (bytesInFlight=1558)
 [QUIC] SEND FIN sid=18 pkt=119
+[QUIC] Sent packet 119 with STREAM frame for stream 18 size=26 fin=1 (bytesInFlight=1644)
+[QUIC] Sent packet 120 with STREAM frame for stream 19 size=128 fin=0 (bytesInFlight=1832)
 [QUIC] SEND FIN sid=19 pkt=121
+[QUIC] Sent packet 121 with STREAM frame for stream 19 size=26 fin=1 (bytesInFlight=1918)
+[QUIC] Sent packet 122 with STREAM frame for stream 20 size=128 fin=0 (bytesInFlight=2106)
 [QUIC] SEND FIN sid=20 pkt=123
+[QUIC] Sent packet 123 with STREAM frame for stream 20 size=26 fin=1 (bytesInFlight=2192)
 CWND_LOG,1.17,47806,47714
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=47806 inflight=47714 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=47806 inflight=47714 retx=0
@@ -251,44 +934,714 @@ CWND_LOG,1.17,47806,47714
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=47806 inflight=47714 retx=0
 [QUIC] ACK largest=684 bytesAcked=47714 cwnd=95520 inflight=0 retx=0
 CWND_LOG,1.18,95520,0
+[QUIC] Received packet 108 with STREAM frame for stream 13 size=128 fin=0
+[QUIC] Sent packet 881 with STREAM frame for stream 13 size=87 fin=0 (bytesInFlight=146)
+[QUIC] Sent packet 882 with STREAM frame for stream 13 size=1137 fin=0 (bytesInFlight=1346)
+[QUIC] Sent packet 883 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=2551)
+[QUIC] Sent packet 884 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=3756)
+[QUIC] Sent packet 885 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=4961)
+[QUIC] Sent packet 886 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=6166)
+[QUIC] Sent packet 887 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=7371)
+[QUIC] Sent packet 888 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=8576)
+[QUIC] Sent packet 889 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=9781)
+[QUIC] Sent packet 890 with STREAM frame for stream 13 size=1140 fin=0 (bytesInFlight=10986)
 [QUIC] SEND FIN sid=13 pkt=891
+[QUIC] Sent packet 891 with STREAM frame for stream 13 size=299 fin=1 (bytesInFlight=11349)
+[QUIC] Received packet 109 with STREAM frame for stream 13 size=26 fin=1
 [QUIC] Received FIN for stream 13 in packet 109
+[QUIC] Received packet 110 with STREAM frame for stream 14 size=128 fin=0
+[QUIC] Sent packet 892 with STREAM frame for stream 14 size=87 fin=0 (bytesInFlight=11495)
+[QUIC] Sent packet 893 with STREAM frame for stream 14 size=1137 fin=0 (bytesInFlight=12695)
+[QUIC] Sent packet 894 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=13900)
+[QUIC] Sent packet 895 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=15105)
+[QUIC] Sent packet 896 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=16310)
+[QUIC] Sent packet 897 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=17515)
+[QUIC] Sent packet 898 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=18720)
+[QUIC] Sent packet 899 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=19925)
+[QUIC] Sent packet 900 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=21130)
+[QUIC] Sent packet 901 with STREAM frame for stream 14 size=1140 fin=0 (bytesInFlight=22335)
 [QUIC] SEND FIN sid=14 pkt=902
+[QUIC] Sent packet 902 with STREAM frame for stream 14 size=299 fin=1 (bytesInFlight=22698)
+[QUIC] Received packet 111 with STREAM frame for stream 14 size=26 fin=1
 [QUIC] Received FIN for stream 14 in packet 111
+[QUIC] Received packet 112 with STREAM frame for stream 15 size=128 fin=0
+[QUIC] Sent packet 903 with STREAM frame for stream 15 size=87 fin=0 (bytesInFlight=22844)
+[QUIC] Sent packet 904 with STREAM frame for stream 15 size=1137 fin=0 (bytesInFlight=24044)
+[QUIC] Sent packet 905 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=25249)
+[QUIC] Sent packet 906 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=26454)
+[QUIC] Sent packet 907 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=27659)
+[QUIC] Sent packet 908 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=28864)
+[QUIC] Sent packet 909 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=30069)
+[QUIC] Sent packet 910 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=31274)
+[QUIC] Sent packet 911 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=32479)
+[QUIC] Sent packet 912 with STREAM frame for stream 15 size=1140 fin=0 (bytesInFlight=33684)
 [QUIC] SEND FIN sid=15 pkt=913
+[QUIC] Sent packet 913 with STREAM frame for stream 15 size=299 fin=1 (bytesInFlight=34047)
+[QUIC] Received packet 113 with STREAM frame for stream 15 size=26 fin=1
 [QUIC] Received FIN for stream 15 in packet 113
+[QUIC] Received packet 114 with STREAM frame for stream 16 size=128 fin=0
+[QUIC] Sent packet 914 with STREAM frame for stream 16 size=87 fin=0 (bytesInFlight=34193)
+[QUIC] Sent packet 915 with STREAM frame for stream 16 size=1137 fin=0 (bytesInFlight=35393)
+[QUIC] Sent packet 916 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=36598)
+[QUIC] Sent packet 917 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=37803)
+[QUIC] Sent packet 918 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=39008)
+[QUIC] Sent packet 919 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=40213)
+[QUIC] Sent packet 920 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=41418)
+[QUIC] Sent packet 921 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=42623)
+[QUIC] Sent packet 922 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=43828)
+[QUIC] Sent packet 923 with STREAM frame for stream 16 size=1140 fin=0 (bytesInFlight=45033)
 [QUIC] SEND FIN sid=16 pkt=924
+[QUIC] Sent packet 924 with STREAM frame for stream 16 size=299 fin=1 (bytesInFlight=45396)
+[QUIC] Received packet 115 with STREAM frame for stream 16 size=26 fin=1
 [QUIC] Received FIN for stream 16 in packet 115
+[QUIC] Received packet 116 with STREAM frame for stream 17 size=128 fin=0
+[QUIC] Sent packet 925 with STREAM frame for stream 17 size=87 fin=0 (bytesInFlight=45542)
+[QUIC] Sent packet 926 with STREAM frame for stream 17 size=1137 fin=0 (bytesInFlight=46742)
+[QUIC] Sent packet 927 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=47947)
+[QUIC] Sent packet 928 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=49152)
+[QUIC] Sent packet 929 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=50357)
+[QUIC] Sent packet 930 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=51562)
+[QUIC] Sent packet 931 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=52767)
+[QUIC] Sent packet 932 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=53972)
+[QUIC] Sent packet 933 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=55177)
+[QUIC] Sent packet 934 with STREAM frame for stream 17 size=1140 fin=0 (bytesInFlight=56382)
 [QUIC] SEND FIN sid=17 pkt=935
+[QUIC] Sent packet 935 with STREAM frame for stream 17 size=299 fin=1 (bytesInFlight=56745)
+[QUIC] Received packet 117 with STREAM frame for stream 17 size=26 fin=1
 [QUIC] Received FIN for stream 17 in packet 117
+[QUIC] Received packet 118 with STREAM frame for stream 18 size=128 fin=0
+[QUIC] Sent packet 936 with STREAM frame for stream 18 size=87 fin=0 (bytesInFlight=56891)
+[QUIC] Sent packet 937 with STREAM frame for stream 18 size=1137 fin=0 (bytesInFlight=58091)
+[QUIC] Sent packet 938 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=59296)
+[QUIC] Sent packet 939 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=60501)
+[QUIC] Sent packet 940 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=61706)
+[QUIC] Sent packet 941 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=62911)
+[QUIC] Sent packet 942 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=64116)
+[QUIC] Sent packet 943 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=65321)
+[QUIC] Sent packet 944 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=66526)
+[QUIC] Sent packet 945 with STREAM frame for stream 18 size=1140 fin=0 (bytesInFlight=67731)
 [QUIC] SEND FIN sid=18 pkt=946
+[QUIC] Sent packet 946 with STREAM frame for stream 18 size=299 fin=1 (bytesInFlight=68094)
+[QUIC] Received packet 119 with STREAM frame for stream 18 size=26 fin=1
 [QUIC] Received FIN for stream 18 in packet 119
+[QUIC] Sent packet 947 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=69297)
+[QUIC] Sent packet 948 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=70500)
+[QUIC] Sent packet 949 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=71703)
+[QUIC] Sent packet 950 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=72906)
+[QUIC] Sent packet 951 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=74109)
+[QUIC] Sent packet 952 with STREAM frame for stream 5 size=1139 fin=0 (bytesInFlight=75312)
+[QUIC] Sent packet 953 with STREAM frame for stream 6 size=1136 fin=0 (bytesInFlight=76510)
+[QUIC] Sent packet 954 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=77713)
+[QUIC] Sent packet 955 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=78916)
+[QUIC] Sent packet 956 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=80119)
+[QUIC] Sent packet 957 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=81322)
+[QUIC] Sent packet 958 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=82525)
+[QUIC] Sent packet 959 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=83728)
+[QUIC] Sent packet 960 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=84931)
+[QUIC] Sent packet 961 with STREAM frame for stream 6 size=1139 fin=0 (bytesInFlight=86134)
+[QUIC] Sent packet 962 with STREAM frame for stream 6 size=298 fin=1 (bytesInFlight=86495)
+[QUIC] Sent packet 963 with STREAM frame for stream 10 size=87 fin=0 (bytesInFlight=86641)
+[QUIC] Sent packet 964 with STREAM frame for stream 10 size=1137 fin=0 (bytesInFlight=87841)
+[QUIC] Sent packet 965 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=89046)
+[QUIC] Sent packet 966 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=90251)
+[QUIC] Sent packet 967 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=91456)
+[QUIC] Sent packet 968 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=92661)
+[QUIC] Sent packet 969 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=93866)
+[QUIC] Sent packet 970 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=95071)
 [QUIC] Congestion control blocked: cwnd=95520 bytesInFlight=95071 need=1205
+[QUIC] Sent packet 973 with STREAM frame for stream 10 size=299 fin=1 (bytesInFlight=95434)
+[QUIC] Received packet 120 with STREAM frame for stream 19 size=128 fin=0
 [QUIC] SEND FIN sid=19 pkt=1006
+[QUIC] Received packet 121 with STREAM frame for stream 19 size=26 fin=1
 [QUIC] Received FIN for stream 19 in packet 121
+[QUIC] Received packet 122 with STREAM frame for stream 20 size=128 fin=0
 [QUIC] SEND FIN sid=20 pkt=1017
+[QUIC] Received packet 123 with STREAM frame for stream 20 size=26 fin=1
 [QUIC] Received FIN for stream 20 in packet 123
 CWND_LOG,1.19,95520,95434
 [QUIC] Congestion control blocked: cwnd=95520 bytesInFlight=95434 need=1206
 CWND_LOG,1.2,95520,95434
+[QUIC] Received packet 881 with STREAM frame for stream 13 size=87 fin=0
+[DEBUG] Stream 13 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 13
+[DEBUG] Received HEADERS for stream 13
+[DEBUG] Set target for stream 13: 10240 bytes
+[DEBUG] Stream 13 removing 87 bytes, remaining: 0
+[QUIC] Received packet 882 with STREAM frame for stream 13 size=1137 fin=0
+[DEBUG] Stream 13 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 13 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 13 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 883 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 13 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 884 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 13 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 885 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 13 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 886 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 13 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 887 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 13 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 888 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 13 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 889 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 13 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 890 with STREAM frame for stream 13 size=1140 fin=0
+[DEBUG] Stream 13 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 13 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 13 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 891 with STREAM frame for stream 13 size=299 fin=1
 [QUIC] Received FIN for stream 13 in packet 891
+[DEBUG] Stream 13 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 13
+[DEBUG] MarkReceived: stream=13 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20284,13,10240
+[DEBUG] Stream 13 completed via offset reassembly! Total: 8/20
+[DEBUG] Stream 13 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 13
+[DEBUG] Stream 13 progress: 10240/10240 bytes
+[QUIC] Received packet 892 with STREAM frame for stream 14 size=87 fin=0
+[DEBUG] Stream 14 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 14
+[DEBUG] Received HEADERS for stream 14
+[DEBUG] Set target for stream 14: 10240 bytes
+[DEBUG] Stream 14 removing 87 bytes, remaining: 0
+[QUIC] Received packet 893 with STREAM frame for stream 14 size=1137 fin=0
+[DEBUG] Stream 14 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 14 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 14 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 894 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 14 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 895 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 14 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 896 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 14 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 897 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 14 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 898 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 14 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 899 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 14 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 900 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 14 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 901 with STREAM frame for stream 14 size=1140 fin=0
+[DEBUG] Stream 14 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 14 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 14 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 902 with STREAM frame for stream 14 size=299 fin=1
 [QUIC] Received FIN for stream 14 in packet 902
+[DEBUG] Stream 14 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 14
+[DEBUG] MarkReceived: stream=14 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20377,14,10240
+[DEBUG] Stream 14 completed via offset reassembly! Total: 9/20
+[DEBUG] Stream 14 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 14
+[DEBUG] Stream 14 progress: 10240/10240 bytes
+[QUIC] Received packet 903 with STREAM frame for stream 15 size=87 fin=0
+[DEBUG] Stream 15 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 15
+[DEBUG] Received HEADERS for stream 15
+[DEBUG] Set target for stream 15: 10240 bytes
+[DEBUG] Stream 15 removing 87 bytes, remaining: 0
+[QUIC] Received packet 904 with STREAM frame for stream 15 size=1137 fin=0
+[DEBUG] Stream 15 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 15 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 15 removing 1137 bytes, remaining: 0
 [QUIC] Congestion control blocked: cwnd=95520 bytesInFlight=95434 need=1206
+[QUIC] Received packet 905 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 15 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 906 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 15 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 907 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 15 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 908 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 15 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 909 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 15 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 910 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 15 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 911 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 15 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 912 with STREAM frame for stream 15 size=1140 fin=0
+[DEBUG] Stream 15 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 15 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 15 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 913 with STREAM frame for stream 15 size=299 fin=1
 [QUIC] Received FIN for stream 15 in packet 913
+[DEBUG] Stream 15 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 15
+[DEBUG] MarkReceived: stream=15 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20471,15,10240
+[DEBUG] Stream 15 completed via offset reassembly! Total: 10/20
+[DEBUG] Stream 15 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 15
+[DEBUG] Stream 15 progress: 10240/10240 bytes
+[QUIC] Received packet 914 with STREAM frame for stream 16 size=87 fin=0
+[DEBUG] Stream 16 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 16
+[DEBUG] Received HEADERS for stream 16
+[DEBUG] Set target for stream 16: 10240 bytes
+[DEBUG] Stream 16 removing 87 bytes, remaining: 0
+[QUIC] Received packet 915 with STREAM frame for stream 16 size=1137 fin=0
+[DEBUG] Stream 16 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 16 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 16 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 916 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 16 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 917 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 16 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 918 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 16 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 919 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 16 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 920 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 16 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 921 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 16 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 922 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 16 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 923 with STREAM frame for stream 16 size=1140 fin=0
+[DEBUG] Stream 16 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 16 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 16 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 924 with STREAM frame for stream 16 size=299 fin=1
 [QUIC] Received FIN for stream 16 in packet 924
+[DEBUG] Stream 16 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 16
+[DEBUG] MarkReceived: stream=16 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20564,16,10240
+[DEBUG] Stream 16 completed via offset reassembly! Total: 11/20
+[DEBUG] Stream 16 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 16
+[DEBUG] Stream 16 progress: 10240/10240 bytes
+[QUIC] Received packet 925 with STREAM frame for stream 17 size=87 fin=0
+[DEBUG] Stream 17 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 17
+[DEBUG] Received HEADERS for stream 17
+[DEBUG] Set target for stream 17: 10240 bytes
+[DEBUG] Stream 17 removing 87 bytes, remaining: 0
+[QUIC] Received packet 926 with STREAM frame for stream 17 size=1137 fin=0
+[DEBUG] Stream 17 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 17 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 17 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 927 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 17 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 928 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 17 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 929 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 17 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 930 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 17 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 931 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 17 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 932 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 17 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 933 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 17 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 934 with STREAM frame for stream 17 size=1140 fin=0
+[DEBUG] Stream 17 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 17 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 17 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 935 with STREAM frame for stream 17 size=299 fin=1
 [QUIC] Received FIN for stream 17 in packet 935
+[DEBUG] Stream 17 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 17
+[DEBUG] MarkReceived: stream=17 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20657,17,10240
+[DEBUG] Stream 17 completed via offset reassembly! Total: 12/20
+[DEBUG] Stream 17 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 17
+[DEBUG] Stream 17 progress: 10240/10240 bytes
+[QUIC] Received packet 936 with STREAM frame for stream 18 size=87 fin=0
+[DEBUG] Stream 18 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 18
+[DEBUG] Received HEADERS for stream 18
+[DEBUG] Set target for stream 18: 10240 bytes
+[DEBUG] Stream 18 removing 87 bytes, remaining: 0
+[QUIC] Received packet 937 with STREAM frame for stream 18 size=1137 fin=0
+[DEBUG] Stream 18 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 18 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 18 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 938 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 18 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 939 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 18 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 940 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 18 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 941 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 18 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 942 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 18 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 943 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 18 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 944 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 18 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 945 with STREAM frame for stream 18 size=1140 fin=0
+[DEBUG] Stream 18 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 18 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 18 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 946 with STREAM frame for stream 18 size=299 fin=1
 [QUIC] Received FIN for stream 18 in packet 946
+[DEBUG] Stream 18 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 18
+[DEBUG] MarkReceived: stream=18 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20751,18,10240
+[DEBUG] Stream 18 completed via offset reassembly! Total: 13/20
+[DEBUG] Stream 18 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 18
+[DEBUG] Stream 18 progress: 10240/10240 bytes
+[QUIC] Received packet 947 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=3324 len=1108 total=4700 bytes
+[DEBUG] Stream 5 received DATA: offset=3324 len=1108 total: 4700/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 948 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=4432 len=1108 total=5808 bytes
+[DEBUG] Stream 5 received DATA: offset=4432 len=1108 total: 5808/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 949 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=5540 len=1108 total=6916 bytes
+[DEBUG] Stream 5 received DATA: offset=5540 len=1108 total: 6916/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 950 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=6648 len=1108 total=8024 bytes
+[DEBUG] Stream 5 received DATA: offset=6648 len=1108 total: 8024/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 951 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=7756 len=1108 total=9132 bytes
+[DEBUG] Stream 5 received DATA: offset=7756 len=1108 total: 9132/10240 bytes
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 952 with STREAM frame for stream 5 size=1139 fin=0
+[DEBUG] Stream 5 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 5
+[DEBUG] MarkReceived: stream=5 offset=8864 len=1108 total=10240 bytes
 STREAM_COMPLETED_LOG,1.2081,5,10240
+[DEBUG] Stream 5 completed via offset reassembly! Total: 14/20
+[DEBUG] Stream 5 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 953 with STREAM frame for stream 6 size=1136 fin=0
+[DEBUG] Stream 6 buffer size: 1136 after adding 1136 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=28 frameLen=1108 actualSize=1136 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 6 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 6 removing 1136 bytes, remaining: 0
+[QUIC] Received packet 954 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 6 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 955 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 6 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 956 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 6 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 957 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 6 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 958 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 6 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 959 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 6 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 960 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 6 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 961 with STREAM frame for stream 6 size=1139 fin=0
+[DEBUG] Stream 6 buffer size: 1139 after adding 1139 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=1108 actualSize=1139 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 6 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 6 removing 1139 bytes, remaining: 0
+[QUIC] Received packet 962 with STREAM frame for stream 6 size=298 fin=1
 [QUIC] Received FIN for stream 6 in packet 962
+[DEBUG] Stream 6 buffer size: 298 after adding 298 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=30 frameLen=268 actualSize=298 for stream 6
+[DEBUG] MarkReceived: stream=6 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.20902,6,10240
+[DEBUG] Stream 6 completed via offset reassembly! Total: 15/20
+[DEBUG] Stream 6 removing 298 bytes, remaining: 0
+[DEBUG] Received FIN for stream 6
+[DEBUG] Stream 6 progress: 10240/10240 bytes
+[QUIC] Received packet 963 with STREAM frame for stream 10 size=87 fin=0
+[DEBUG] Stream 10 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 10
+[DEBUG] Received HEADERS for stream 10
+[DEBUG] Set target for stream 10: 10240 bytes
+[DEBUG] Stream 10 removing 87 bytes, remaining: 0
+[QUIC] Received packet 964 with STREAM frame for stream 10 size=1137 fin=0
+[DEBUG] Stream 10 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 10 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 10 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 965 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 10 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 966 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 10 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 967 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 10 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 968 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 10 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 969 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 10 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 970 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 10 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 973 with STREAM frame for stream 10 size=299 fin=1
 [QUIC] Received FIN for stream 10 in packet 973
+[DEBUG] Stream 10 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=9972 len=268 total=8024 bytes
+[DEBUG] Stream 10 received DATA: offset=9972 len=268 total: 8024/10240 bytes
+[DEBUG] Stream 10 removing 299 bytes, remaining: 0
 [WARN] FIN before target on stream 10 got=8024 need=10240
+[DEBUG] Received FIN for stream 10
+[DEBUG] Stream 10 progress: 8024/10240 bytes
+[QUIC] RTT update: 46ms, SRTT: 42ms, RTO: 100ms
 [QUIC] ACK largest=123 bytesAcked=2192 cwnd=17414 inflight=0 retx=0
 CWND_LOG,1.21,95520,95434
 [QUIC] Congestion control blocked: cwnd=95520 bytesInFlight=95434 need=1206
@@ -352,6 +1705,7 @@ CWND_LOG,1.22,95520,95434
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=95520 inflight=95434 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=95520 inflight=95434 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=95520 inflight=95434 retx=0
+[QUIC] RTT update: 44ms, SRTT: 41ms, RTO: 100ms
 [QUIC] ACK largest=950 bytesAcked=72906 cwnd=168426 inflight=22528 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=168426 inflight=22528 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=168426 inflight=22528 retx=0
@@ -373,17 +1727,347 @@ CWND_LOG,1.22,95520,95434
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=168426 inflight=22528 retx=0
 CWND_LOG,1.23,168426,22528
 [QUIC] ACK largest=1018 bytesAcked=22528 cwnd=190954 inflight=0 retx=0
+[QUIC] Sent packet 1203 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=1206)
+[QUIC] Sent packet 1204 with STREAM frame for stream 10 size=1140 fin=0 (bytesInFlight=2412)
+[QUIC] Sent packet 1205 with STREAM frame for stream 11 size=87 fin=0 (bytesInFlight=2559)
+[QUIC] Sent packet 1206 with STREAM frame for stream 11 size=1137 fin=0 (bytesInFlight=3760)
+[QUIC] Sent packet 1207 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=4966)
+[QUIC] Sent packet 1208 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=6172)
+[QUIC] Sent packet 1209 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=7378)
+[QUIC] Sent packet 1210 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=8584)
+[QUIC] Sent packet 1211 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=9790)
+[QUIC] Sent packet 1212 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=10996)
+[QUIC] Sent packet 1213 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=12202)
+[QUIC] Sent packet 1214 with STREAM frame for stream 11 size=1140 fin=0 (bytesInFlight=13408)
+[QUIC] Sent packet 1215 with STREAM frame for stream 11 size=299 fin=1 (bytesInFlight=13772)
+[QUIC] Sent packet 1216 with STREAM frame for stream 12 size=87 fin=0 (bytesInFlight=13919)
+[QUIC] Sent packet 1217 with STREAM frame for stream 12 size=1137 fin=0 (bytesInFlight=15120)
+[QUIC] Sent packet 1218 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=16326)
+[QUIC] Sent packet 1219 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=17532)
+[QUIC] Sent packet 1220 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=18738)
+[QUIC] Sent packet 1221 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=19944)
+[QUIC] Sent packet 1222 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=21150)
+[QUIC] Sent packet 1223 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=22356)
+[QUIC] Sent packet 1224 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=23562)
+[QUIC] Sent packet 1225 with STREAM frame for stream 12 size=1140 fin=0 (bytesInFlight=24768)
+[QUIC] Sent packet 1226 with STREAM frame for stream 12 size=299 fin=1 (bytesInFlight=25132)
+[QUIC] Sent packet 1227 with STREAM frame for stream 19 size=87 fin=0 (bytesInFlight=25279)
+[QUIC] Sent packet 1228 with STREAM frame for stream 19 size=1137 fin=0 (bytesInFlight=26480)
+[QUIC] Sent packet 1229 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=27686)
+[QUIC] Sent packet 1230 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=28892)
+[QUIC] Sent packet 1231 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=30098)
+[QUIC] Sent packet 1232 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=31304)
+[QUIC] Sent packet 1233 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=32510)
+[QUIC] Sent packet 1234 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=33716)
+[QUIC] Sent packet 1235 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=34922)
+[QUIC] Sent packet 1236 with STREAM frame for stream 19 size=1140 fin=0 (bytesInFlight=36128)
+[QUIC] Sent packet 1237 with STREAM frame for stream 19 size=299 fin=1 (bytesInFlight=36492)
+[QUIC] Sent packet 1238 with STREAM frame for stream 20 size=87 fin=0 (bytesInFlight=36639)
+[QUIC] Sent packet 1239 with STREAM frame for stream 20 size=1137 fin=0 (bytesInFlight=37840)
+[QUIC] Sent packet 1240 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=39046)
+[QUIC] Sent packet 1241 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=40252)
+[QUIC] Sent packet 1242 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=41458)
+[QUIC] Sent packet 1243 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=42664)
+[QUIC] Sent packet 1244 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=43870)
+[QUIC] Sent packet 1245 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=45076)
+[QUIC] Sent packet 1246 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=46282)
+[QUIC] Sent packet 1247 with STREAM frame for stream 20 size=1140 fin=0 (bytesInFlight=47488)
+[QUIC] Sent packet 1248 with STREAM frame for stream 20 size=299 fin=1 (bytesInFlight=47852)
 CWND_LOG,1.24,190954,47852
 CWND_LOG,1.25,190954,47852
+[QUIC] Received packet 1203 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=7756 len=1108 total=9132 bytes
+[DEBUG] Stream 10 received DATA: offset=7756 len=1108 total: 9132/10240 bytes
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1204 with STREAM frame for stream 10 size=1140 fin=0
+[DEBUG] Stream 10 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 10
+[DEBUG] MarkReceived: stream=10 offset=8864 len=1108 total=10240 bytes
 STREAM_COMPLETED_LOG,1.25501,10,10240
+[DEBUG] Stream 10 completed via offset reassembly! Total: 16/20
+[DEBUG] Stream 10 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1205 with STREAM frame for stream 11 size=87 fin=0
+[DEBUG] Stream 11 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 11
+[DEBUG] Received HEADERS for stream 11
+[DEBUG] Set target for stream 11: 10240 bytes
+[DEBUG] Stream 11 removing 87 bytes, remaining: 0
+[QUIC] Received packet 1206 with STREAM frame for stream 11 size=1137 fin=0
+[DEBUG] Stream 11 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 11 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 11 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 1207 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 11 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1208 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 11 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1209 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 11 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1210 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 11 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1211 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 11 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1212 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 11 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1213 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 11 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1214 with STREAM frame for stream 11 size=1140 fin=0
+[DEBUG] Stream 11 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 11 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 11 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1215 with STREAM frame for stream 11 size=299 fin=1
 [QUIC] Received FIN for stream 11 in packet 1215
+[DEBUG] Stream 11 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 11
+[DEBUG] MarkReceived: stream=11 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.25594,11,10240
+[DEBUG] Stream 11 completed via offset reassembly! Total: 17/20
+[DEBUG] Stream 11 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 11
+[DEBUG] Stream 11 progress: 10240/10240 bytes
+[QUIC] Received packet 1216 with STREAM frame for stream 12 size=87 fin=0
+[DEBUG] Stream 12 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 12
+[DEBUG] Received HEADERS for stream 12
+[DEBUG] Set target for stream 12: 10240 bytes
+[DEBUG] Stream 12 removing 87 bytes, remaining: 0
+[QUIC] Received packet 1217 with STREAM frame for stream 12 size=1137 fin=0
+[DEBUG] Stream 12 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 12 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 12 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 1218 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 12 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1219 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 12 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1220 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 12 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1221 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 12 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1222 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 12 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1223 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 12 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1224 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 12 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1225 with STREAM frame for stream 12 size=1140 fin=0
+[DEBUG] Stream 12 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 12 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 12 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1226 with STREAM frame for stream 12 size=299 fin=1
 [QUIC] Received FIN for stream 12 in packet 1226
+[DEBUG] Stream 12 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 12
+[DEBUG] MarkReceived: stream=12 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.25688,12,10240
+[DEBUG] Stream 12 completed via offset reassembly! Total: 18/20
+[DEBUG] Stream 12 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 12
+[DEBUG] Stream 12 progress: 10240/10240 bytes
+[QUIC] Received packet 1227 with STREAM frame for stream 19 size=87 fin=0
+[DEBUG] Stream 19 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 19
+[DEBUG] Received HEADERS for stream 19
+[DEBUG] Set target for stream 19: 10240 bytes
+[DEBUG] Stream 19 removing 87 bytes, remaining: 0
+[QUIC] Received packet 1228 with STREAM frame for stream 19 size=1137 fin=0
+[DEBUG] Stream 19 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 19 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 19 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 1229 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 19 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1230 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 19 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1231 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 19 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1232 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 19 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1233 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 19 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1234 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 19 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1235 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 19 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1236 with STREAM frame for stream 19 size=1140 fin=0
+[DEBUG] Stream 19 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 19 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 19 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1237 with STREAM frame for stream 19 size=299 fin=1
 [QUIC] Received FIN for stream 19 in packet 1237
+[DEBUG] Stream 19 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 19
+[DEBUG] MarkReceived: stream=19 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.25781,19,10240
+[DEBUG] Stream 19 completed via offset reassembly! Total: 19/20
+[DEBUG] Stream 19 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 19
+[DEBUG] Stream 19 progress: 10240/10240 bytes
+[QUIC] Received packet 1238 with STREAM frame for stream 20 size=87 fin=0
+[DEBUG] Stream 20 buffer size: 87 after adding 87 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=27 frameLen=60 actualSize=87 for stream 20
+[DEBUG] Received HEADERS for stream 20
+[DEBUG] Set target for stream 20: 10240 bytes
+[DEBUG] Stream 20 removing 87 bytes, remaining: 0
+[QUIC] Received packet 1239 with STREAM frame for stream 20 size=1137 fin=0
+[DEBUG] Stream 20 buffer size: 1137 after adding 1137 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=29 frameLen=1108 actualSize=1137 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=0 len=1108 total=1108 bytes
+[DEBUG] Stream 20 received DATA: offset=0 len=1108 total: 1108/10240 bytes
+[DEBUG] Stream 20 removing 1137 bytes, remaining: 0
+[QUIC] Received packet 1240 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=1108 len=1108 total=2216 bytes
+[DEBUG] Stream 20 received DATA: offset=1108 len=1108 total: 2216/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1241 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=2216 len=1108 total=3324 bytes
+[DEBUG] Stream 20 received DATA: offset=2216 len=1108 total: 3324/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1242 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=3324 len=1108 total=4432 bytes
+[DEBUG] Stream 20 received DATA: offset=3324 len=1108 total: 4432/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1243 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=4432 len=1108 total=5540 bytes
+[DEBUG] Stream 20 received DATA: offset=4432 len=1108 total: 5540/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1244 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=5540 len=1108 total=6648 bytes
+[DEBUG] Stream 20 received DATA: offset=5540 len=1108 total: 6648/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1245 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=6648 len=1108 total=7756 bytes
+[DEBUG] Stream 20 received DATA: offset=6648 len=1108 total: 7756/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1246 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=7756 len=1108 total=8864 bytes
+[DEBUG] Stream 20 received DATA: offset=7756 len=1108 total: 8864/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1247 with STREAM frame for stream 20 size=1140 fin=0
+[DEBUG] Stream 20 buffer size: 1140 after adding 1140 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=32 frameLen=1108 actualSize=1140 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=8864 len=1108 total=9972 bytes
+[DEBUG] Stream 20 received DATA: offset=8864 len=1108 total: 9972/10240 bytes
+[DEBUG] Stream 20 removing 1140 bytes, remaining: 0
+[QUIC] Received packet 1248 with STREAM frame for stream 20 size=299 fin=1
 [QUIC] Received FIN for stream 20 in packet 1248
+[DEBUG] Stream 20 buffer size: 299 after adding 299 bytes
+[DEBUG] Parsing frame: start=0 payloadStart=31 frameLen=268 actualSize=299 for stream 20
+[DEBUG] MarkReceived: stream=20 offset=9972 len=268 total=10240 bytes
 STREAM_COMPLETED_LOG,1.25875,20,10240
+[DEBUG] Stream 20 completed via offset reassembly! Total: 20/20
+[DEBUG] Stream 20 removing 299 bytes, remaining: 0
+[DEBUG] Received FIN for stream 20
+[DEBUG] Stream 20 progress: 10240/10240 bytes
 CWND_LOG,1.26,190954,47852
 CWND_LOG,1.27,190954,47852
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=190954 inflight=47852 retx=0
@@ -424,6 +2108,7 @@ CWND_LOG,1.27,190954,47852
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=190954 inflight=47852 retx=0
 [QUIC] ACK largest=0 bytesAcked=0 cwnd=190954 inflight=47852 retx=0
 CWND_LOG,1.28,190954,47852
+[QUIC] RTT update: 45ms, SRTT: 42ms, RTO: 100ms
 [QUIC] ACK largest=1248 bytesAcked=47852 cwnd=238806 inflight=0 retx=0
 CWND_LOG,1.29,238806,0
 CWND_LOG,1.3,238806,0
