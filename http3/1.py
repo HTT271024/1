@@ -45,7 +45,7 @@ def run_test(args_tuple):
     # NEW: Add --quiet=true to the command if not in verbose mode
     if not verbose:
         cmd.append("--quiet=true")
-        
+    
     # 为HOL阻塞测试增加更长的模拟时间
     if test_name == "hol_blocking":
         cmd.append("--simTime=240.0")  # 增加到240秒

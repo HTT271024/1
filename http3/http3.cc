@@ -253,17 +253,17 @@ public:
     m_udp->SetRecvCallback(MakeCallback(&QuicSession::OnUdpRecv, this));
     
     // 初始化拥塞控制参数
-    // ★ 关键修复：将初始CWND从60降到10 ★
     m_cwnd = 10 * kQuicMssBytes;      // 从一个更合理的值开始慢启动
     m_ssthresh = UINT64_MAX;
     m_srtt = MilliSeconds(0);
     m_rttvar = MilliSeconds(0);
-    m_rto = MilliSeconds(80);        // 降低初始RTO，加速调试 (100ms -> 80ms)
+    // ★ 更改 3: 将初始RTO调整到200毫秒，更符合现代互联网的快速探测
+    m_rto = MilliSeconds(200);
     m_bytesInFlight = 0;
     m_lastLossTs = Seconds(0);
     
-    // 初始化流控窗口
-    m_connWindowBytes = 256 * 1024 * 1024;  // 连接窗口 256MB
+    // ★ 更改 2: 将流量控制窗口从256MB降低到更现实的16MB
+    m_connWindowBytes = 16 * 1024 * 1024;
     
     // 初始化ACK相关
     m_ackDelay = MilliSeconds(1);     // 最小化ACK延迟 (2ms -> 1ms)
@@ -566,6 +566,27 @@ private:
         m_unacked.erase(it);
       }
     }
+    std::vector<uint64_t> to_remove_implicitly;
+    for (const auto& kv : m_unacked) {
+        // 如果一个包的序号比最新确认的包还小，但它还在未确认列表里，
+        // 说明它的直接ACK丢失了，但它已经被后续的ACK累积确认。
+        if (kv.first < m_largestAcked) { 
+            to_remove_implicitly.push_back(kv.first);
+        }
+    }
+
+    for (uint64_t pn : to_remove_implicitly) {
+        auto it = m_unacked.find(pn);
+        if (it != m_unacked.end()) {
+            if (!m_quiet) {
+                std::cout << "[QUIC] Implicitly ACKed and removing stale packet " << pn << std::endl;
+            }
+            // 从在途字节中减去，并从map中删除
+            uint32_t sz = it->second.size;
+            m_bytesInFlight = (m_bytesInFlight >= sz ? m_bytesInFlight - sz : 0);
+            m_unacked.erase(it);
+        }
+    }
 
     // Congestion control
     // ★ 使用新逻辑更新 CWND ★
@@ -767,41 +788,44 @@ private:
   }
 
   // 新增：PTO超时处理函数
-  void OnPto() {
-      if (m_bytesInFlight == 0) {
-          return; // 没有在途数据，不需要探测
+void OnPto() {
+      // 如果没有在途数据或没有未确认的包，则不需要探测，直接返回并取消定时器。
+      if (m_unacked.empty() || m_bytesInFlight == 0) {
+          if (m_ptoTimer.IsPending()) m_ptoTimer.Cancel();
+          return; 
       }
       
       if (!m_quiet) {
-        std::cout << "[QUIC] PTO Fired! Sending a PING frame to elicit ACK." << std::endl;
+        std::cout << "[QUIC] PTO Fired! Sending a PING frame to elicit an ACK." << std::endl;
       }
 
-      // 发送一个PING帧来探测网络
-      QuicFrame ping;
-      ping.type = QF_PING;
-      ping.streamId = 0;
-      ping.offset = 0;
-      ping.payload = "";
+      // 1. 创建一个探测帧 (PING)。
+      //    PING 帧是 "ack-eliciting"，意味着接收方收到后必须回复一个 ACK。
+      //    这就达到了我们探测网络连通性和诱导 ACK 的目的。
+      QuicFrame pingFrame;
+      pingFrame.type = QF_PING;
+      pingFrame.streamId = 0; // PING 不属于任何流
+      pingFrame.offset = 0;
+      pingFrame.payload = "";
 
-      // 注意：PING帧也需要封装在QuicPacket里
-      QuicPacket p;
-      p.pktNum = 0; // PING包可以不消耗包序号
-      p.frames.push_back(ping);
+      // 2. 将 PING 帧封装并作为新数据包发送。
+      //    我们调用 SendPacket 函数，这样这个探测包本身也会被赋予序号、
+      //    加入到 m_unacked 列表并计入在途字节。
+      //    这很重要，因为如果连这个探测包都丢失了，它最终会触发 RTO。
+      //    我们传递 isRetransmission = true 是为了避免这个探测包本身
+      //    受到拥塞控制的限制，确保它能被发送出去。
+      SendPacket({pingFrame}, true); 
 
-      std::string s = p.Serialize();
-      Ptr<Packet> udpPkt = Create<Packet>(reinterpret_cast<const uint8_t*>(s.data()), s.size());
-      if (!(m_peer == Address())) m_udp->SendTo(udpPkt, 0, m_peer);
-      else m_udp->Send(udpPkt);
+      // 3. PTO 超时后，进行指数退避并重新启动定时器。
+      //    这意味着下一次 PTO 的等待时间会翻倍，防止在网络持续无响应时
+      //    过于频繁地发送探测包。
+      //    我们同样从 m_rto 计算基础超时时间。
+      Time next_pto_delay = m_ptoTimer.GetDelay() * 2;
+      // 设置一个上限，比如 5 秒，防止无限增长
+      next_pto_delay = std::min(next_pto_delay, Seconds(5));
 
-      // 强制快速重传最早未确认包，避免长时间等待
-      if (!m_unacked.empty()) {
-        uint64_t oldest = m_unacked.begin()->first;
-        std::cout << "[QUIC] PTO -> force retransmit pkt " << oldest << std::endl;
-        Retransmit(oldest);
-      }
-
-      // PTO超时后，进行指数退避并重新启动定时器
-      ArmPto(); 
+      if (m_ptoTimer.IsPending()) m_ptoTimer.Cancel();
+      m_ptoTimer = Simulator::Schedule(next_pto_delay, &QuicSession::OnPto, this);
   }
   
   
@@ -838,10 +862,16 @@ private:
 class Http3ClientApp : public Application {
 public:
   Http3ClientApp() : m_socket(0), m_port(0) {}
-  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs, double interval, bool thirdParty, uint32_t nStreams, bool quiet = false) {
+  // ★ 更改 4a: 在Setup方法中增加一个Time类型的参数来接收链路延迟
+  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs, double interval, bool thirdParty, uint32_t nStreams, Time linkDelay, bool quiet = false) {
     m_servAddr = servAddr; m_port = port; m_reqSize = reqSize; m_nReqs = nReqs;
     m_interval = interval; m_thirdParty = thirdParty; m_nStreams = nStreams;
+    m_linkDelay = linkDelay; // 存储延迟值
     m_quiet = quiet;
+  }
+  // ★ 兼容重载：保留旧签名，默认 linkDelay=0ms
+  void Setup(Address servAddr, uint16_t port, uint32_t reqSize, uint32_t nReqs, double interval, bool thirdParty, uint32_t nStreams, bool quiet = false) {
+    Setup(servAddr, port, reqSize, nReqs, interval, thirdParty, nStreams, MilliSeconds(0), quiet);
   }
 
   uint32_t GetRespsRcvd() const { return m_respsRcvd; }
@@ -889,13 +919,12 @@ private:
     m_streamBytesReceived.clear();
     m_finalSize.clear();
 
-    // 握手时延建模（模拟TLS1.3 1-RTT）
-    // 从P2P延迟估算RTT，添加握手开销
-    double estimatedRtt = 0.010;  // 默认10ms，实际应该从网络配置获取
-    double handshakeDelay = estimatedRtt;  // 1-RTT握手
+    // ★ 更改 4d: 动态握手时延建模（1-RTT）
+    // 握手时间约等于一个往返时间(RTT)，即2倍的单向链路延迟
+    double handshakeDelay = 2 * m_linkDelay.GetSeconds();
     
     if (!m_quiet) {
-      std::cout << "[QUIC] Estimated RTT: " << (estimatedRtt * 1000) << "ms, handshake delay: " 
+      std::cout << "[QUIC] Link one-way delay: " << m_linkDelay.GetMilliSeconds() << "ms, simulating 1-RTT handshake delay of: " 
                 << (handshakeDelay * 1000) << "ms" << std::endl;
     }
     
@@ -1157,6 +1186,7 @@ private:
   bool m_thirdParty{false};
   uint32_t m_nStreams{3};
   Ptr<QuicSession> m_session;
+  Time m_linkDelay; // ★ 更改 4b: 新增一个成员变量来存储链路延迟
 
   std::map<uint32_t,uint32_t> m_streamBytes, m_streamTargetBytes;
   std::map<uint32_t,bool>     m_streamCompleted;
@@ -1476,7 +1506,10 @@ private:
     // 这会创建一个连续、平滑的发送流，而不是之前的"爆发-等待"模式。
     if (!m_pendingQueue.empty()) {
         m_sending = true;
-        Simulator::ScheduleNow(&Http3ServerApp::SendTick, this);
+        // 使用QuicSession中的GetPacingDelay函数来获取延迟
+        // 如果sendBytes为0（在tick中没有发送任何东西），则立即安排下一次尝试
+        Time pacingDelay = (sendBytes > 0) ? m_session->GetPacingDelay(sendBytes) : Seconds(0);
+        Simulator::Schedule(pacingDelay, &Http3ServerApp::SendTick, this);
     } else {
         m_sending = false; // 所有任务都完成了
     }

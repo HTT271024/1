@@ -519,6 +519,9 @@ private:
    virtual void StartApplication() override {
        m_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
        
+       // Record connection start time
+       m_connectionStartTime = Simulator::Now();
+       
        // 设置连接回调，确保连接建立后再发送数据
        m_socket->SetConnectCallback(
            MakeCallback(&HTTP2ClientApp::ConnectionSucceeded, this),
@@ -573,6 +576,11 @@ private:
    void ConnectionSucceeded(Ptr<Socket> socket) {
        std::cout << "[Client] TCP connection established successfully" << std::endl;
        m_connected = true;
+       
+       // Record connection establishment time
+       double connectionTime = (Simulator::Now() - m_connectionStartTime).GetMilliSeconds();
+       std::cout << "Connection time: " << connectionTime << " ms" << std::endl;
+       
        // 周期性 finalize 检查，缓解小分片边界遗漏
        Simulator::Schedule(MilliSeconds(2), &HTTP2ClientApp::PeriodicFinalizeCheck, this);
        // 连接建立后开始发送请求
@@ -908,6 +916,9 @@ private:
    // 新增: 窗口更新阈值和计数器
    std::map<uint32_t, uint64_t> m_streamBytesProcessed; // 每个流已处理但未发送更新的字节数
    uint64_t m_connBytesProcessed = 0; // 连接级已处理但未发送更新的字节数
+   
+   // Connection time tracking
+   Time m_connectionStartTime; // Added to track connection establishment time
 };
 
 

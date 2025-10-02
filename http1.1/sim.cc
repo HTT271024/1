@@ -148,7 +148,13 @@ private:
   virtual void StartApplication() override {
     m_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
     m_socket->Connect(InetSocketAddress(Ipv4Address::ConvertFrom(m_servAddr), m_port));
-    m_socket->SetRecvCallback(MakeCallback(&HttpClientApp::HandleRead, this));
+    
+    // Record connection start time
+    m_connectionStartTime = Simulator::Now();
+    
+    m_socket->SetConnectCallback(
+      MakeCallback(&HttpClientApp::ConnectionSucceeded, this),
+      MakeCallback(&HttpClientApp::ConnectionFailed, this));
     
     // 禁用Nagle算法，减少应用层引入的HOL干扰
     Ptr<TcpSocketBase> tcpSock = DynamicCast<TcpSocketBase>(m_socket);
@@ -277,6 +283,18 @@ private:
       }
     }
   }
+  void ConnectionSucceeded(Ptr<Socket> socket) {
+    m_socket->SetRecvCallback(MakeCallback(&HttpClientApp::HandleRead, this));
+    
+    // Record connection establishment time
+    double connectionTime = (Simulator::Now() - m_connectionStartTime).GetMilliSeconds();
+    std::cout << "Connection time: " << connectionTime << " ms" << std::endl;
+    
+    SendNextRequest();
+  }
+  void ConnectionFailed(Ptr<Socket> socket) {
+    std::cout << "Connection failed." << std::endl;
+  }
   Ptr<Socket> m_socket;
   Address m_servAddr;
   uint16_t m_port;
@@ -295,6 +313,7 @@ private:
   bool m_thirdParty = false;
   uint32_t m_reqHdrBytes; // Fixed request header size
   std::vector<uint32_t> m_doneSizes; // 记录每个响应的实际接收大小
+  Time m_connectionStartTime; // Added to track connection establishment time
 };
 
 // ===================== Main =====================
